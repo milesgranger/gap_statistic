@@ -43,7 +43,7 @@ plt.rcParams['figure.figsize'] = 10, 10
 
 
 ```python
-x, y = make_blobs(750, n_features=2, centers=12)
+x, y = make_blobs(750, n_features=2, centers=6)
 
 plt.scatter(x[:, 0], x[:, 1])
 plt.show()
@@ -55,6 +55,7 @@ plt.show()
 
 
 ```python
+# Give the data to optimalK with maximum considered clusters of 15
 n, gapdf = optimalK(x, nrefs=3, maxClusters=15)
 print 'Optimal Clusters: ', n
 
@@ -67,7 +68,7 @@ plt.title('Gap Values by Cluster Count')
 plt.show()
 ```
 
-    Optimal Clusters:  11
+    Optimal Clusters:  6
 
 
 
@@ -76,6 +77,7 @@ plt.show()
 
 
 ```python
+# Now that we have the optimal clusters, n, we build our own KMeans model...
 km = KMeans(n)
 km.fit(x)
 
