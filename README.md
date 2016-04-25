@@ -4,7 +4,7 @@
 
 ---
 #### Purpose
-Dynamically identify the number of optimal clusters given data using KMeans iteratively to calculate the gap statistic for each possible cluster count from 1 to maxClusters. Identifies the optimal cluster count in that range by returning cluster count which resulted in the highest gap statistic
+Dynamically identify the number of clusters using KMeans iteratively to calculate the gap statistic for each possible cluster count from 1 to maxClusters. Identifies the optimal cluster count in that range by returning the cluster count which resulted in the highest gap statistic
 
 ---
 
