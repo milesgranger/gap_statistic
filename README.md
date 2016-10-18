@@ -20,7 +20,12 @@ Parameters:
 ---
 #### Install:
 
-cd into site-packages directory and run: <p><code>git clone https://github.com/milesgranger/gap_statistic.git</code></p>
+<p><code>pip install git+git://github.com/milesgranger/gap_statistic.git</code></p>
+
+---
+#### Uninstall:
+
+<p><code>pip uninstall gap-statistic</code></p>
 
 ---
 
