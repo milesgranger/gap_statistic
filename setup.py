@@ -16,6 +16,6 @@ setup(name='gap-statistic',
       author='Miles Granger',
       author_email='miles.granger@outlook.com',
       description='Python implementation of the gap statistic',
-      packages=['optimalK'],
+      packages=['gap_statistic'],
       zip_safe=True
       )
