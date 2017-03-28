@@ -1,1 +1,1 @@
-from optimalK import optimalK
+from .optimalK import optimalK
