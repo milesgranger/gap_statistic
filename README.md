@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from gap_statistic.optimalK import optimalK
+from gap_statistic import optimalK
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.cluster import KMeans
 
