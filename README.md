@@ -10,7 +10,7 @@ Dynamically identify the number of clusters using KMeans iteratively to calculat
 
 #### Usage:
 
-<p><code>from gap_statistic.optimalK import optimalK</code></p>
+<p><code>from gap_statistic import optimalK</code></p>
 
 Parameters:
 - data: ndarray of shape (n_samples, n_features)
