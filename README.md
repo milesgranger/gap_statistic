@@ -1,6 +1,6 @@
 
 ## gap_statistic
-### Python implementation of the [Gap Statistic]('gap statistic' http://www.web.stanford.edu/~hastie/Papers/gap.pdf) using pandas, numpy, and SciKit-Learn
+### Python implementation of the [Gap Statistic](http://www.web.stanford.edu/~hastie/Papers/gap.pdf) using pandas, numpy, and SciKit-Learn
 
 ---
 #### Purpose
@@ -55,7 +55,7 @@ plt.show()
 ```
 
 
-![png](output_2_0.png)
+![png](media/output_2_0.png)
 
 
 
@@ -77,7 +77,7 @@ plt.show()
 
 
 
-![png](output_3_1.png)
+![png](media/output_3_1.png)
 
 
 
@@ -102,7 +102,7 @@ plt.show()
 ```
 
 
-![png](output_4_0.png)
+![png](media/output_4_0.png)
 
 
 

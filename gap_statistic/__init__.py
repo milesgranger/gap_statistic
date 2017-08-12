@@ -1,1 +1,1 @@
-from .optimalK import optimalK
+from gap_statistic.optimalK import OptimalK
