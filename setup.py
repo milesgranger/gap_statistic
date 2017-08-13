@@ -6,7 +6,7 @@ except ImportError:
 
 
 setup(name='gap-stat',
-      version='1.0',
+      version='1.0.1',
       author='Miles Granger',
       maintainer='Miles Granger',
       author_email='miles.granger@outlook.com',
