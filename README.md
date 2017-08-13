@@ -1,6 +1,8 @@
 
 ### Python implementation of the [Gap Statistic](http://www.web.stanford.edu/~hastie/Papers/gap.pdf)
 
+![Build Status](https://travis-ci.org/milesgranger/gap_statistic.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
 ---
 #### Purpose
 Dynamically identify the suggested number of clusters in a data-set
@@ -11,14 +13,20 @@ using the gap statistic.
 ### Full example available in a notebook [HERE](Example.ipynb)
 
 ---
-#### Install:
+#### Install:  
+Bleeding edge:  
 ```commandline
 pip install git+git://github.com/milesgranger/gap_statistic.git
+```
+
+PyPi:  
+```commandline
+pip install --upgrade gap-stat
 ```
 
 ---
 #### Uninstall:
 ```commandline
-pip uninstall gap-statistic
+pip uninstall gap-stat
 ```
 
