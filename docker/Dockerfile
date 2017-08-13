@@ -8,4 +8,5 @@ RUN bash miniconda.sh -bf -p /anaconda
 RUN rm miniconda.sh
 ENV PATH /anaconda/bin:$PATH
 RUN pip install --upgrade pip
+RUN pip install pytest coverage
 RUN conda install numpy pandas scikit-learn joblib -y
