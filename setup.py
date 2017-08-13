@@ -5,7 +5,7 @@ except ImportError:
     from distutils.core import setup
 
 
-setup(name='gap-statistic',
+setup(name='gap-stat',
       version='1.0',
       author='Miles Granger',
       maintainer='Miles Granger',
@@ -20,7 +20,7 @@ setup(name='gap-statistic',
       zip_safe=True,
       install_requires=['numpy', 'pandas', 'scipy'],
       setup_requires=['pytest-runner'],
-      tests_require=['pytest'],
+      tests_require=['pytest', 'scikit-learn'],
       classifiers=[
             'Programming Language :: Python :: 3',
             'Development Status :: 4 - Beta'
