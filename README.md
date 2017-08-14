@@ -5,8 +5,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
 
 
-![Anaconda](https://anaconda.org/milesgranger/gap-stat/badges/version.svg)
-![Anaconda](https://anaconda.org/milesgranger/gap-stat/badges/installer/conda.svg)
+[![Anaconda](https://anaconda.org/milesgranger/gap-stat/badges/version.svg)](https://anaconda.org/milesgranger/gap-stat)
+[![Anaconda](https://anaconda.org/milesgranger/gap-stat/badges/installer/conda.svg)](https://anaconda.org/milesgranger/gap-stat)
 ---
 #### Purpose
 Dynamically identify the suggested number of clusters in a data-set
