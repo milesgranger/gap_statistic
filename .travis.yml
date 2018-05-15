@@ -1,22 +1,27 @@
-sudo: required
+language: rust
 
-language: python
+rust:
+  - stable
 
 python:
-  - 3.5
+  - "3.5"
+  - "3.6"
 
-services:
-  - docker
-
-before_install:
-  - docker build . -f ./docker/Dockerfile -t milesg/gap-statistic:1.0
+# TODO: Add matrix to test with multiple python versions
+cache: cargo
 
 install:
-  - pip install coveralls
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment python=3.5 -y
+  - source activate test-environment
 
 script:
-  docker run --rm -v `pwd`:`pwd` -w `pwd` milesg/gap-statistic:1.0 coverage run --source=gap_statistic setup.py test
-
-after_success:
-  - coverage combine --append
-  - coveralls
+  - cargo test
+  - python setup.py test
