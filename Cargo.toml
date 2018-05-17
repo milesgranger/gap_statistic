@@ -9,5 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 num = "0.1"
+rand = "0.4.2"
 ndarray = "0.11.1"
+ndarray-rand = "0.7.0"
 pyo3 = {version="0.2", features=["extension-module"]}

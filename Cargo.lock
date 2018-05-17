@@ -40,8 +40,10 @@ name = "gap-statistic"
 version = "1.1.0"
 dependencies = [
  "ndarray 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ndarray-rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "pyo3 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -103,6 +105,15 @@ dependencies = [
  "matrixmultiply 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-complex 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "ndarray-rand"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "ndarray 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -347,6 +358,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum matrixmultiply 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)" = "cac1a66eab356036af85ea093101a14223dc6e3f4c02a59b7d572e5b93270bf7"
 "checksum memchr 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "796fba70e76612589ed2ce7f45282f5af869e0fdd7cc6199fa1aa1f1d591ba9d"
 "checksum ndarray 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)" = "0e3d24c5ba54015d7d5203ca6f00d4cc16c71042bf7f7be26f091236f390a16a"
+"checksum ndarray-rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a1c4fb64752b33845fda9e1514af5b28c33448b1f341f5f1fe0e700ea6c935f"
 "checksum num 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "4703ad64153382334aa8db57c637364c322d3372e097840c72000dabdcf6156e"
 "checksum num-bigint 0.1.44 (registry+https://github.com/rust-lang/crates.io-index)" = "e63899ad0da84ce718c14936262a41cee2c79c981fc0a0e7c7beb47d5a07e8c1"
 "checksum num-complex 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)" = "b288631d7878aaf59442cffd36910ea604ecd7745c36054328595114001c9656"
