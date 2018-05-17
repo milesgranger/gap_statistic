@@ -3,8 +3,10 @@
 pub extern crate pyo3;
 pub extern crate ndarray;
 pub extern crate ndarray_rand;
-pub extern crate num;
 pub extern crate rand;
+pub extern crate statrs;
+
+pub mod kmeans;
 
 use pyo3::prelude::*;
 use pyo3::py::modinit as pymodinit;

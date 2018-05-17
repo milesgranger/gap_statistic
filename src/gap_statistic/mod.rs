@@ -1,14 +1,12 @@
 #![allow(dead_code, unused)]  // TODO: Remove this when things settle into place.
 
-use ndarray::{Array2, Array1};
+use ndarray::{Array2, Array1, Axis};
 use ndarray_rand::RandomExt;
 use rand::distributions::Range;
+use statrs::statistics::Mean;
+use statrs::statistics::Statistics;
 
-// Centroid struct; hold place inside data
-// TODO: Implement this
-struct Centroid<'a> {
-    data: &'a Array2<f64>
-}
+use kmeans::Centroid;
 
 // Kmeans Entry point
 // TODO: Implement this
@@ -43,11 +41,17 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
         let random_data = Array2::random(data.dim(), Range::new(0.0, 1.0));
 
         // Get centroids from data, each centroid contains .point() and .label()
-        let centroids = kmeans(&random_data, i as u32, 10, "points");
-        ref_dispersions[i] = 5;
+        let (centroids, labels) = kmeans(&random_data, n_clusters, 10, "points");
+        ref_dispersions[i] = calculate_dispersion(&random_data, labels, centroids);
     }
 
-    5.6
+    // Do calculations for the actual data
+    let (centroids, labels) = kmeans(&data, n_clusters, 10, "points");
+    let dispersion = calculate_dispersion(&data, labels, centroids);
+
+    // Calculate and return gap value
+    let gap_value = ref_dispersions.into_iter().mean().log2() - dispersion.log2();
+    gap_value
 }
 
 
