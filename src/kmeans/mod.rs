@@ -5,7 +5,7 @@ use ndarray_rand::RandomExt;
 use rand::distributions::Range;
 
 // Centroid struct; hold place inside data
-// TODO: Implement this
+#[derive(Clone)]
 pub struct Centroid {
     pub center: Array1<f64>,
     pub stable: bool
@@ -46,8 +46,17 @@ impl KMeans {
         }
     }
 
-    pub fn fit(&mut self, data: &Array2<f64>) -> () {
+    pub fn fit(mut self, data: &Array2<f64>) -> () {
 
+        // Initialize centroids based on data passed
+        self.centroids = Some(self.init_cenroids(&data));
+
+        // for each centroid update location up until max_iter
+        for _ in 0..self.max_iter {
+            for centroid in self.centroids.unwrap().iter_mut() {
+                centroid.update(&data);
+            }
+        }
     }
 
     fn init_cenroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
