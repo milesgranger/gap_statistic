@@ -21,8 +21,11 @@ impl Centroid {
         }
     }
 
-    pub fn update(&mut self, data: &Array2<f64>) -> () {
-        ()
+    pub fn update(self, data: &Array2<f64>) -> Self {
+        Centroid{
+            center: self.center,
+            stable: false
+        }
     }
 
 }
@@ -53,9 +56,13 @@ impl KMeans {
 
         // for each centroid update location up until max_iter
         for _ in 0..self.max_iter {
-            for centroid in self.centroids.unwrap().iter_mut() {
-                centroid.update(&data);
-            }
+            self.centroids = Some(
+                self.centroids
+                    .unwrap()
+                    .iter()
+                    .map(|cent| cent.clone().update(&data))
+                    .collect::<Vec<Centroid>>()
+            )
         }
     }
 
