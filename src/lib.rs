@@ -1,7 +1,7 @@
 #![feature(proc_macro, specialization)]
 
 pub extern crate pyo3;
-pub extern crate ndarray;
+#[macro_use] pub extern crate ndarray;
 pub extern crate ndarray_rand;
 pub extern crate rand;
 pub extern crate statrs;

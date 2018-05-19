@@ -6,13 +6,14 @@ use rand::distributions::Range;
 use statrs::statistics::Mean;
 use statrs::statistics::Statistics;
 
-use kmeans::Centroid;
+use kmeans::{KMeans, Centroid};
 
 // Kmeans Entry point
 // TODO: Implement this
-fn kmeans<'a>(data: &'a Array2<f64>, k: u32, iter: u32, minit: &str) -> (Vec<Centroid<'a>>, Vec<u32>) {
+fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, minit: &str) -> (Vec<Centroid>, Vec<u32>) {
 
-    (vec![Centroid{data: &data}, Centroid{data: &data}], vec![1, 2])
+    let kmeans = KMeans::new(k, 0.001, max_iter);
+    (kmeans.centroids.unwrap(), vec![1, 2, 1, 2, 2, 1])
 }
 
 // Obtain the optimal clusters for the given dataset.

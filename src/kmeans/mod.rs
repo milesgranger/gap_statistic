@@ -1,15 +1,69 @@
 #![allow(dead_code, unused)]
 
-use ndarray::Array2;
+use ndarray::{Array1, Array2, Ix2};
+use ndarray_rand::RandomExt;
+use rand::distributions::Range;
 
 // Centroid struct; hold place inside data
 // TODO: Implement this
-pub struct Centroid<'a> {
-    pub data: &'a Array2<f64>
+pub struct Centroid {
+    pub center: Array1<f64>,
+    pub stable: bool
 }
 
-struct KMeans {
-    k: u32,
-    tolerance: f64,
-    max_iterations: u32
+
+impl Centroid {
+
+    pub fn new(center: Array1<f64>) -> Self {
+        Centroid{
+            center,
+            stable: false
+        }
+    }
+
+    pub fn update(&mut self, data: &Array2<f64>) -> () {
+        ()
+    }
+
+}
+
+pub struct KMeans {
+    pub k: u32,
+    pub tolerance: f64,
+    pub max_iter: u32,
+    pub centroids: Option<Vec<Centroid>>
+}
+
+impl KMeans {
+
+    pub fn new(k: u32, tolerance: f64, max_iter: u32) -> Self {
+
+        KMeans{
+            k,
+            tolerance,
+            max_iter,
+            centroids: None
+        }
+    }
+
+    pub fn fit(&mut self, data: &Array2<f64>) -> () {
+
+    }
+
+    fn init_cenroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
+
+        // Create a sampling index from the data size
+        let rand_sample = Array1::random(
+            (data.dim().0,), Range::new(0, data.len() - 1)
+        );
+
+        // Take this random sampling and pull out points inside of the data for each centroid
+        // to start with
+        let centroids = rand_sample
+            .iter()
+            .map(|idx| Centroid::new(data.slice(s![*idx as i32, ..]).to_owned()))
+            .collect::<Vec<Centroid>>();
+
+        centroids
+    }
 }
