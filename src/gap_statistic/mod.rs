@@ -13,7 +13,7 @@ use kmeans::{KMeans, Centroid};
 fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, minit: &str) -> (Vec<Centroid>, Vec<u32>) {
 
     let mut kmeans = KMeans::new(k, 0.001, max_iter);
-    kmeans = kmeans.fit(&data);
+    kmeans.fit(&data);
     (kmeans.centroids.unwrap(), vec![1, 2, 1, 2, 2, 1])
 }
 

@@ -1,29 +1,58 @@
 #![allow(dead_code, unused)]
 
-use ndarray::{Array1, Array2, Ix2};
+use std::iter::Sum;
+use ndarray::{Array1, Array2, Ix2, Zip, Axis};
 use ndarray_rand::RandomExt;
 use rand::distributions::Range;
+use statrs::statistics::Statistics;
 
 // Centroid struct; hold place inside data
 #[derive(Clone)]
 pub struct Centroid {
     pub center: Array1<f64>,
-    pub stable: bool
+    pub stable: bool,
+    pub tolerance: f64
 }
 
 
 impl Centroid {
 
-    pub fn new(center: Array1<f64>) -> Self {
+    pub fn new(center: Array1<f64>, tolerance: f64) -> Self {
         Centroid{
             center,
+            tolerance,
             stable: false
         }
     }
 
+    pub fn distance(&self, point: &Array1<f64>) -> f64 {
+        /*
+            Compuet the distance of a point from the center of this centroid
+            // TODO: Implement metric other than Euclidean; and implement this better?
+        */
+
+        // Calculate Euclidean distance
+        let distance: f64 = Sum::sum(
+            point.into_iter()
+                .zip(self.center.into_iter())
+                .map(|(a, b): (&f64, &f64)| (a - b).powf(2.0))
+        );
+        distance.sqrt()
+    }
+
     pub fn update(self, data: &Array2<f64>) -> Self {
+
+        if self.stable {
+            return Centroid{
+                center: self.center,
+                tolerance: self.tolerance,
+                stable: false
+            }
+        }
+
         Centroid{
             center: self.center,
+            tolerance: self.tolerance,
             stable: false
         }
     }
@@ -49,15 +78,17 @@ impl KMeans {
         }
     }
 
-    pub fn fit(mut self, data: &Array2<f64>) -> () {
+    pub fn fit(&mut self, data: &Array2<f64>) -> (){
 
         // Initialize centroids based on data passed
         self.centroids = Some(self.init_cenroids(&data));
 
         // for each centroid update location up until max_iter
+        // TODO: Implement break if all centroids are stable.
         for _ in 0..self.max_iter {
             self.centroids = Some(
                 self.centroids
+                    .clone()
                     .unwrap()
                     .iter()
                     .map(|cent| cent.clone().update(&data))
@@ -77,7 +108,7 @@ impl KMeans {
         // to start with
         let centroids = rand_sample
             .iter()
-            .map(|idx| Centroid::new(data.slice(s![*idx as i32, ..]).to_owned()))
+            .map(|idx| Centroid::new(data.slice(s![*idx as i32, ..]).to_owned(), self.tolerance))
             .collect::<Vec<Centroid>>();
 
         centroids
