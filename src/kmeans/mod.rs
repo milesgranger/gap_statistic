@@ -45,17 +45,12 @@ impl Centroid {
         distance.sqrt()
     }
 
-    pub fn update(&self, data: &Array2<f64>) -> Self {
+    pub fn update(&mut self, data: &Array2<f64>) -> () {
         /*
             Given new data (points assigned to this centroid), update the centroid
         */
         if self.stable {
-            return Centroid{
-                center: self.center.clone(),
-                label: self.label,
-                tolerance: self.tolerance,
-                stable: false
-            }
+            return ()
         }
 
         // Determine the average of this data.
@@ -68,12 +63,9 @@ impl Centroid {
                 .map(|(current, original): (&f64, &f64)| (current - original) / original * 100f64)
         );
 
-        Centroid{
-            center,
-            label: self.label,
-            tolerance: self.tolerance,
-            stable: diff <= self.tolerance
-        }
+        self.center = center;
+        self.stable = diff <= self.tolerance;
+        ()
     }
 
 }
