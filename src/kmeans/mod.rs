@@ -45,12 +45,12 @@ impl Centroid {
         distance.sqrt()
     }
 
-    pub fn update(&mut self, data: &Array2<f64>) -> () {
+    pub fn update(&mut self, data: &Array2<f64>) {
         /*
             Given new data (points assigned to this centroid), update the centroid
         */
         if self.stable {
-            return ()
+            return
         }
 
         // Determine the average of this data.
@@ -65,7 +65,6 @@ impl Centroid {
 
         self.center = center;
         self.stable = diff <= self.tolerance;
-        ()
     }
 
 }
@@ -91,32 +90,54 @@ impl KMeans {
         }
     }
 
-    pub fn fit(&mut self, data: &Array2<f64>) -> (){
+    pub fn fit(&mut self, data: &Array2<f64>) {
+        /*
+            Fit KMeans model to data
+        */
 
         // Initialize centroids based on data passed
-        self.centroids = Some(self.init_cenroids(&data));
+        self.centroids = Some(self.init_centroids(&data));
 
-        let labels = self.predict(&data);
+        // Try to converge centroids up to max_iter
+        for i in 0..self.max_iter {
 
-        if let Some(ref mut centroids) = self.centroids {
+            // Get current centroid assignments for data
+            let labels = self.predict(&data);
+            let mut n_stable = 0;
 
-            for ref mut centroid in centroids {
-                let filtered_points = labels.iter()
-                    .zip(data.outer_iter())
-                    .enumerate()
-                    .filter_map(|(idx, (label, point))| {
-                        match *label == centroid.label {
-                            true => Some(idx as usize),
-                            false => None
-                        }
-                    })
-                    .collect::<Vec<usize>>();
+            // Assuming we have initialized centroids...
+            if let Some(ref mut centroids) = self.centroids {
 
-                let points = data.select(Axis(0), &filtered_points);
+                // Iter over centroids, collecting points assigned to that cluster, and then
+                // update the centroid center.
+                for ref mut centroid in centroids {
+
+                    // Find indexes of points beloning to current centroid
+                    let filtered_points = labels.iter()
+                        .zip(data.outer_iter())
+                        .enumerate()
+                        .filter_map(|(idx, (label, point))| {
+                            match *label == centroid.label {
+                                true => Some(idx as usize),
+                                false => None
+                            }
+                        })
+                        .collect::<Vec<usize>>();
+
+                    // Fetch those points and update centroid
+                    let points = data.select(Axis(0), &filtered_points);
+                    centroid.update(&points);
+                    if centroid.stable {
+                        n_stable += 1;
+                    }
+                }
             }
-            ()
-        }
 
+            // Check if all centroids are converged, and break if so.
+            if n_stable == self.k {
+                break
+            }
+        }
     }
 
     pub fn predict(&self, data: &Array2<f64>) -> Vec<u32> {
@@ -146,7 +167,7 @@ impl KMeans {
         classifications
     }
 
-    fn init_cenroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
+    fn init_centroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
 
         // Create a sampling index from the data size
         // TODO: Implement random sampling without replacement.
