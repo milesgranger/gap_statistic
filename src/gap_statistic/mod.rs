@@ -14,19 +14,30 @@ fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, minit: &str) -> (Vec
 
     let mut kmeans = KMeans::new(k, 0.001, max_iter);
     kmeans.fit(&data);
-    (kmeans.centroids.unwrap(), vec![1, 2, 1, 2, 2, 1])
+    let labels = kmeans.predict(&data);
+    (kmeans.centroids.unwrap(), labels)
 }
 
-// Obtain the optimal clusters for the given dataset.
-pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> u32 {
 
+pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)> {
+    /*
+        Given 2d data and a cluster range, return a vector of tuples
+        where the first element represents n_clusters, and second represents the gap value.
+        (Higher the gap value, the better!)
+    */
     // Convert vector to Array
-    // TODO: deal with this better than using unwrap, pass error if present
-    let data = Array2::from_shape_vec(
-    (data.len(), data[0].len()), data
-    ).unwrap();
+    let mut array = Array2::zeros((data.len(), data[0].len()));
+    for vec in data {
+        array.assign(&Array1::from_vec(vec));
+    }
 
-    5
+    // Get gap values for each cluster in range.
+    let gap_values = cluster_range
+        .iter()
+        .map(|n_clusters| (*n_clusters, calculate_gap(&array, *n_clusters)))
+        .collect::<Vec<(u32, f64)>>();
+
+    gap_values
 }
 
 
