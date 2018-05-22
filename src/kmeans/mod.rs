@@ -1,15 +1,18 @@
 #![allow(dead_code, unused)]
 
+use std::f64;
+use std::ops::Index;
 use std::iter::Sum;
 use ndarray::{Array1, Array2, Ix2, Zip, Axis, ArrayView1, ArrayView2};
 use ndarray_rand::RandomExt;
 use rand::distributions::Range;
-use statrs::statistics::Statistics;
+use statrs::statistics::Min;
+
 
 /// Centroid struct
 /// Hold the current centroid location along with status such as if the centroid is stable
 /// within the data given a tolerance.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Centroid {
     pub center: Array1<f64>,
     pub label: u32,
@@ -54,7 +57,7 @@ impl Centroid {
         }
 
         // Determine the average of this data.
-        let center: Array1<f64> = data.mean_axis(Axis(0));
+        let center = data.mean_axis(Axis(0));
 
         // Calculate the difference between new center and previous, set stable if <= tolerance
         let diff: f64 = Sum::sum(
@@ -125,7 +128,7 @@ impl KMeans {
                         .collect::<Vec<usize>>();
 
                     // Fetch those points and update centroid
-                    let points = data.select(Axis(0), &filtered_points);
+                    let points = data.select(Axis(1), &filtered_points);
                     centroid.update(&points);
                     if centroid.stable {
                         n_stable += 1;
@@ -154,12 +157,15 @@ impl KMeans {
                     .iter()
                     .map(|centroid| centroid.distance(&point))
                     .collect::<Vec<f64>>();
-                let max: f64 = Sum::sum(distances.iter());
-                let label = distances
-                    .iter()
-                    .position(|&x| x == max)
-                    .unwrap() as u32;
-                classifications.push(label);
+                let mut min = f64::MAX;
+                let mut label= 0;
+                for (i, val) in distances.iter().enumerate() {
+                    if val < &min {
+                        min = *val;
+                        label = i;
+                    }
+                }
+                classifications.push(label as u32);
             } else {
                 panic!("Centroids are non-existant!");
             }
@@ -171,16 +177,16 @@ impl KMeans {
 
         // Create a sampling index from the data size
         // TODO: Implement random sampling without replacement.
-        let rand_sample = Array1::random(
-            (data.dim().0,), Range::new(0, data.len() - 1)
+        let rand_sample_indexes = Array1::random(
+            (self.k as usize,), Range::new(0, data.dim().0 - 1)
         );
 
         // Take this random sampling and pull out points inside of the data for each centroid
         // to start with
-        let centroids = rand_sample
+        let centroids = rand_sample_indexes
             .iter()
             .enumerate()
-            .map(|(label, idx)| Centroid::new(data.slice(s![*idx as i32, ..]).to_owned(), self.tolerance, label as u32))
+            .map(|(label, rand_idx)| Centroid::new(data.slice(s![*rand_idx, ..]).to_owned(), self.tolerance, label as u32))
             .collect::<Vec<Centroid>>();
 
         centroids

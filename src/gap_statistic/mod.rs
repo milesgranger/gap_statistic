@@ -1,5 +1,7 @@
 #![allow(dead_code, unused)]  // TODO: Remove this when things settle into place.
 
+use std::collections::HashMap;
+use std::iter::FromIterator;
 use ndarray::{Array2, Array1, Axis};
 use ndarray_rand::RandomExt;
 use rand::distributions::Range;
@@ -15,7 +17,7 @@ fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, minit: &str) -> (Vec
     let mut kmeans = KMeans::new(k, 0.001, max_iter);
     kmeans.fit(&data);
     let labels = kmeans.predict(&data);
-    (kmeans.centroids.unwrap(), labels)
+    (kmeans.centroids.expect("No centroids inside of KMeans model!").clone(), labels.clone())
 }
 
 
@@ -62,8 +64,9 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
     let (centroids, labels) = kmeans(&data, n_clusters, 10, "points");
     let dispersion = calculate_dispersion(&data, labels, centroids);
 
+
     // Calculate and return gap value
-    let gap_value = ref_dispersions.into_iter().mean().log2() - dispersion.log2();
+    let gap_value = (ref_dispersions.into_iter().mean() + 1f64).log2() - (dispersion + 1f64).log2();
     gap_value
 }
 
@@ -71,5 +74,24 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
 // Calculate the dispersion
 // TODO: Implement this
 fn calculate_dispersion(data: &Array2<f64>, labels: Vec<u32>, centroids: Vec<Centroid>) -> f64 {
-    1.1
+
+    // Place centroids in hashmap for looking up
+    let centroid_lookup = HashMap::<u32, Array1<f64>>::from_iter(
+        centroids.iter().map(|centroid| (centroid.label as u32, centroid.center.clone()))
+    );
+
+    println!("Keys: {:?}", &centroid_lookup.keys());
+
+    let dispersion: f64 = labels.iter()
+        .zip(data.outer_iter())
+        .map(|(label, point)|
+                 point.iter()
+                     .zip(centroid_lookup
+                         .get(label as &u32)
+                         .expect(&format!("Couldn't find point for label: {}!", label))
+                         .iter())
+                     .map(|(a, b): (&f64, &f64)| (a - b).abs().powf(2f64))
+                     .sum::<f64>())
+        .sum();
+    dispersion
 }

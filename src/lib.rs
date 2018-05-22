@@ -6,11 +6,13 @@ pub extern crate ndarray_rand;
 pub extern crate rand;
 pub extern crate statrs;
 
-pub mod kmeans;
 
 use pyo3::prelude::*;
 use pyo3::py::modinit as pymodinit;
 
+#[cfg(test)]
+mod tests;
+pub mod kmeans;
 pub mod gap_statistic;
 
 
