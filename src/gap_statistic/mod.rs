@@ -5,6 +5,7 @@ use std::iter::FromIterator;
 use ndarray::{Array2, Array1, Axis};
 use ndarray_rand::RandomExt;
 use rand::distributions::Range;
+use num_traits::pow::Pow;
 use statrs::statistics::Mean;
 use statrs::statistics::Statistics;
 
@@ -53,7 +54,8 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
     for i in 0..n_refs {
 
         // Generate some random data for this round
-        let random_data = Array2::random(data.dim(), Range::new(0.0, 1.0));
+        let random_data = Array2::random(data.dim(), Range::new(-100_f64, 100_f64));
+        println!("Random data: {:?}", &random_data);
 
         // Get centroids from data, each centroid contains .point() and .label()
         let (centroids, labels) = kmeans(&random_data, n_clusters, 10, "points");
@@ -90,7 +92,7 @@ fn calculate_dispersion(data: &Array2<f64>, labels: Vec<u32>, centroids: Vec<Cen
                          .get(label as &u32)
                          .expect(&format!("Couldn't find point for label: {}!", label))
                          .iter())
-                     .map(|(a, b): (&f64, &f64)| (a - b).abs().powf(2f64))
+                     .map(|(a, b): (&f64, &f64)| (a - b).abs().pow(2))
                      .sum::<f64>())
         .sum();
     dispersion

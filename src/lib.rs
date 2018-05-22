@@ -5,6 +5,7 @@ pub extern crate pyo3;
 pub extern crate ndarray_rand;
 pub extern crate rand;
 pub extern crate statrs;
+pub extern crate num_traits;
 
 
 use pyo3::prelude::*;

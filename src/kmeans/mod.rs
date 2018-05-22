@@ -159,13 +159,13 @@ impl KMeans {
                     .collect::<Vec<f64>>();
                 let mut min = f64::MAX;
                 let mut label= 0;
-                for (i, val) in distances.iter().enumerate() {
-                    if val < &min {
-                        min = *val;
-                        label = i;
+                for (dist, centroid) in distances.iter().zip(centroids.iter()) {
+                    if dist < &min {
+                        min = *dist;
+                        label = centroid.label;
                     }
                 }
-                classifications.push(label as u32);
+                classifications.push(label);
             } else {
                 panic!("Centroids are non-existant!");
             }
