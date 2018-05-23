@@ -33,7 +33,7 @@ impl Centroid {
         }
     }
 
-    pub fn distance(&self, point: &ArrayView1<f64>) -> f64 {
+    pub fn distance(point_a: &ArrayView1<f64>, point_b: &ArrayView1<f64>) -> f64 {
         /*
             Compuet the distance of a point from the center of this centroid
             // TODO: Implement metric other than Euclidean; and implement this better?
@@ -41,8 +41,8 @@ impl Centroid {
 
         // Calculate Euclidean distance
         let distance: f64 = Sum::sum(
-            point.into_iter()
-                .zip(self.center.into_iter())
+            point_a.into_iter()
+                .zip(point_b.into_iter())
                 .map(|(a, b): (&f64, &f64)| (a - b).powf(2f64))
         );
         distance.sqrt()
@@ -161,7 +161,7 @@ impl KMeans {
             if let Some(ref centroids) = self.centroids {
                 let distances = centroids
                     .iter()
-                    .map(|centroid| centroid.distance(&point))
+                    .map(|centroid| Centroid::distance(&centroid.center.view(), &point))
                     .collect::<Vec<f64>>();
                 let mut min = f64::MAX;
                 let mut label= 0;

@@ -63,6 +63,6 @@ fn test_optimalk() {
         .map(|arr| arr.to_vec())
         .collect::<Vec<Vec<f64>>>();
 
-    let result = gap_statistic::optimal_k(data, (1..10).collect());
+    let result = gap_statistic::optimal_k(data, (1..6).collect());
     println!("Got {:?}", result)
 }

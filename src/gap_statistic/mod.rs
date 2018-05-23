@@ -65,8 +65,6 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
         ref_dispersions[i] = calculate_dispersion(&random_data, labels, centroids);
     }
 
-    println!("Existing n_refs loop! N_CLUSTERS: {}", &n_clusters);
-
     // Do calculations for the actual data
     let (centroids, labels) = kmeans(&data, n_clusters, 10, "points");
     let dispersion = calculate_dispersion(&data, labels, centroids);
