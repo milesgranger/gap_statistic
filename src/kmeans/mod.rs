@@ -57,6 +57,7 @@ impl Centroid {
         }
 
         // Determine the average of this data.
+        //println!("Data: {:?}", &data);
         let center = data.mean_axis(Axis(0));
 
         // Calculate the difference between new center and previous, set stable if <= tolerance
@@ -128,8 +129,13 @@ impl KMeans {
                         .collect::<Vec<usize>>();
 
                     // Fetch those points and update centroid
-                    let points = data.select(Axis(1), &filtered_points);
-                    centroid.update(&points);
+                    let points = data.select(Axis(0), &filtered_points);
+
+                    // Check if cluster has any assigned points, update if so.
+                    if !&points.is_empty() {
+                        centroid.update(&points);
+                    }
+
                     if centroid.stable {
                         n_stable += 1;
                     }
@@ -150,7 +156,7 @@ impl KMeans {
         //let mut classifications = Vec::new();
         // Sort the data into which centroid it should be pushed to
         let mut classifications = Vec::new();
-        for point in data.axis_iter(Axis(1)) {
+        for point in data.outer_iter() {
 
             if let Some(ref centroids) = self.centroids {
                 let distances = centroids
@@ -186,7 +192,9 @@ impl KMeans {
         let centroids = rand_sample_indexes
             .iter()
             .enumerate()
-            .map(|(label, rand_idx)| Centroid::new(data.slice(s![*rand_idx, ..]).to_owned(), self.tolerance, label as u32))
+            .map(|(label, rand_idx)| Centroid::new(
+                data.slice(s![*rand_idx, ..]).to_owned(), self.tolerance, label as u32)
+            )
             .collect::<Vec<Centroid>>();
 
         centroids

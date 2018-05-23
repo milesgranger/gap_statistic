@@ -29,15 +29,19 @@ pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)
         (Higher the gap value, the better!)
     */
     // Convert vector to Array
-    let mut array = Array2::zeros((data.len(), data[0].len()));
-    for vec in data {
-        array.assign(&Array1::from_vec(vec));
-    }
+    let shape = (data.len(), data[0].len());
+    //let mut array = Array2::zeros(shape);
+    let data = Array1::from_iter(
+        data
+            .iter()
+            .flat_map(|v| v.clone()))  // TODO: Do better than clone...
+            .into_shape(shape)
+            .expect("Failed to reshape!");
 
     // Get gap values for each cluster in range.
     let gap_values = cluster_range
         .iter()
-        .map(|n_clusters| (*n_clusters, calculate_gap(&array, *n_clusters)))
+        .map(|n_clusters| (*n_clusters, calculate_gap(&data, *n_clusters)))
         .collect::<Vec<(u32, f64)>>();
 
     gap_values
@@ -54,13 +58,14 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
     for i in 0..n_refs {
 
         // Generate some random data for this round
-        let random_data = Array2::random(data.dim(), Range::new(-100_f64, 100_f64));
-        println!("Random data: {:?}", &random_data);
+        let random_data = Array2::random(data.dim(), Range::new(-1_f64, 1_f64));
 
         // Get centroids from data, each centroid contains .point() and .label()
         let (centroids, labels) = kmeans(&random_data, n_clusters, 10, "points");
         ref_dispersions[i] = calculate_dispersion(&random_data, labels, centroids);
     }
+
+    println!("Existing n_refs loop! N_CLUSTERS: {}", &n_clusters);
 
     // Do calculations for the actual data
     let (centroids, labels) = kmeans(&data, n_clusters, 10, "points");
@@ -81,8 +86,6 @@ fn calculate_dispersion(data: &Array2<f64>, labels: Vec<u32>, centroids: Vec<Cen
     let centroid_lookup = HashMap::<u32, Array1<f64>>::from_iter(
         centroids.iter().map(|centroid| (centroid.label as u32, centroid.center.clone()))
     );
-
-    println!("Keys: {:?}", &centroid_lookup.keys());
 
     let dispersion: f64 = labels.iter()
         .zip(data.outer_iter())
