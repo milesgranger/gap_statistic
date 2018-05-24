@@ -3,6 +3,7 @@
 pub extern crate pyo3;
 #[macro_use] pub extern crate ndarray;
 pub extern crate ndarray_rand;
+pub extern crate ndarray_linalg;
 pub extern crate rand;
 pub extern crate statrs;
 pub extern crate num_traits;

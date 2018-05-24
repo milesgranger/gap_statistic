@@ -5,7 +5,10 @@ use std::ops::Index;
 use std::iter::Sum;
 use ndarray::{Array1, Array2, Ix2, Zip, Axis, ArrayView1, ArrayView2};
 use ndarray_rand::RandomExt;
-use rand::distributions::Range;
+use ndarray_linalg::norm;
+use rand::distributions::{Range};
+use rand;
+use rand::Rng;
 use statrs::statistics::Min;
 
 
@@ -132,6 +135,7 @@ impl KMeans {
                     let points = data.select(Axis(0), &filtered_points);
 
                     // Check if cluster has any assigned points, update if so.
+                    // TODO: In theory, this probably should never happen..check why it does here sometimes.
                     if !&points.is_empty() {
                         centroid.update(&points);
                     }
@@ -181,22 +185,107 @@ impl KMeans {
 
     fn init_centroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
 
-        // Create a sampling index from the data size
-        // TODO: Implement random sampling without replacement.
-        let rand_sample_indexes = Array1::random(
-            (self.k as usize,), Range::new(0, data.dim().0 - 1)
-        );
+        // Set vector of indices representing points to be assigned to centroids
+        let mut indices = Vec::with_capacity(self.k as usize);
 
-        // Take this random sampling and pull out points inside of the data for each centroid
-        // to start with
-        let centroids = rand_sample_indexes
-            .iter()
+        // Choose first point at random.
+        indices.push(rand::thread_rng().gen_range(0, data.shape()[0]) as usize);
+
+        // Start choosing new centroid locations based on k-means++
+        while indices.len() < self.k as usize {
+            let center = data.slice(s![indices[indices.len()-1], ..]);
+
+            // Get normalized distances from center
+            let distances = Self::normed_distances_from_point(&center, &data, None);
+
+            // Choose new center based on normed distances
+            let new_centroid_idx = Self::choose_next_centroid_idx(distances.expect("Didn't get distances back!"));
+            indices.push(new_centroid_idx);
+
+        }
+
+        let centroids = data.select(Axis(0), &indices)
+            .outer_iter()
             .enumerate()
-            .map(|(label, rand_idx)| Centroid::new(
-                data.slice(s![*rand_idx, ..]).to_owned(), self.tolerance, label as u32)
-            )
+            .map(|(i, point)| Centroid::new(point.to_owned(), self.tolerance, i as u32))
             .collect::<Vec<Centroid>>();
-
         centroids
     }
+
+    fn choose_next_centroid_idx(mut normed_distances: Array1<f64>) -> usize {
+        /*
+            Based on normed distances, choose the new centroid by returning the index to select on from dataset
+        */
+
+
+        let sum = normed_distances.sum_axis(Axis(0));
+        normed_distances = normed_distances / &sum;
+        let cumsum = normed_distances
+            .iter()
+            .scan(0.0, |cs: &mut f64, value| {
+                *cs += *value;
+                Some(*cs)
+            })
+            .collect::<Vec<f64>>();
+
+        let random_prob = rand::thread_rng().gen_range(0_f64, 1_f64);
+        let new_centroid_idx = cumsum
+            .iter()
+            .enumerate()
+            .filter_map(|(i, prob)| {
+                if prob >= &random_prob {
+                    Some(i)
+                } else {
+                    None
+                }
+            })
+            .next()
+            .expect(&format!("No probabilities found greater than {}", &random_prob));
+
+        new_centroid_idx
+
+    }
+
+    fn normed_distances_from_point(center: &ArrayView1<f64>, points: &Array2<f64>, previous_distances: Option<Array1<f64>>) -> Option<Array1<f64>> {
+        /*
+            Calculate the abs distance for every point from center and return a normal distribution
+            from there; only if the new distance is less than the previous distance (if any supplied)
+        */
+
+        // Compute normed distances from each point to center
+        let mut distances = points
+            .outer_iter()
+            .map(|point|
+                norm::normalize((point.to_owned() - center.to_owned())
+                                    .into_shape((1, point.len()))
+                                    .expect("Unable to reshape!"),
+                                norm::NormalizeAxis::Row,
+                )
+            )
+            .map(|(_, normalized)| (normalized[0] as f64).powf(2_f64))
+            .collect::<Vec<f64>>();
+
+        // If previous distances were passed, return the lowest dist when compared against new distances
+        // otherwise return the current distances.
+        match previous_distances {
+            Some(prev_distances) => {
+                let distances = prev_distances
+                    .iter()
+                    .zip(distances.iter())
+                    .map(|(old_dist, new_dist)| {
+                       if new_dist < old_dist {
+                           *new_dist
+                       } else {
+                           *old_dist
+                       }
+                    })
+                    .collect();
+                Some(Array1::from_vec(distances))
+            },
+            None => {
+                Some(Array1::from_vec(distances))
+            }
+        }
+    }
+
 }
