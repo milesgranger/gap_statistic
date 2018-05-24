@@ -192,14 +192,17 @@ impl KMeans {
         indices.push(rand::thread_rng().gen_range(0, data.shape()[0]) as usize);
 
         // Start choosing new centroid locations based on k-means++
+        let distances = None;
         while indices.len() < self.k as usize {
+
+            // Get the most recent added center
             let center = data.slice(s![indices[indices.len()-1], ..]);
 
             // Get normalized distances from center
-            let distances = Self::normed_distances_from_point(&center, &data, None);
+            let distances = Self::normed_distances_from_point(&center, &data, distances);
 
             // Choose new center based on normed distances
-            let new_centroid_idx = Self::choose_next_centroid_idx(distances.expect("Didn't get distances back!"));
+            let new_centroid_idx = Self::choose_next_centroid_idx(distances.expect("Didn't get distances back!").clone());
             indices.push(new_centroid_idx);
 
         }
@@ -246,7 +249,7 @@ impl KMeans {
 
     }
 
-    fn normed_distances_from_point(center: &ArrayView1<f64>, points: &Array2<f64>, previous_distances: Option<Array1<f64>>) -> Option<Array1<f64>> {
+    fn normed_distances_from_point(center: &ArrayView1<f64>, points: &Array2<f64>, previous_distances: Option<&Array1<f64>>) -> Option<Array1<f64>> {
         /*
             Calculate the abs distance for every point from center and return a normal distribution
             from there; only if the new distance is less than the previous distance (if any supplied)
