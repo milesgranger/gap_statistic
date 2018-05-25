@@ -21,6 +21,13 @@ pub mod gap_statistic;
 #[pymodinit(gapstat)]
 fn init_mod(py: Python, m: &PyModule) -> PyResult<()> {
 
+    #[pyfn(m, "kmeans")]
+    fn kmeans_py(data: Vec<Vec<f64>>, k: u32, max_iter: u32) -> PyResult<Vec<u32>> {
+        let data = gap_statistic::convert_2d_vec_to_array(data);
+        let (_centroids, labels) = gap_statistic::kmeans(&data, k, max_iter);
+        Ok(labels)
+    }
+
     #[pyfn(m, "optimal_k")]
     fn gap_statistic_py(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> PyResult<Vec<(u32, f64)>> {
        Ok(gap_statistic::optimal_k(data, cluster_range))
