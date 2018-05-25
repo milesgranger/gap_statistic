@@ -4,10 +4,11 @@ pub extern crate pyo3;
 #[macro_use] pub extern crate ndarray;
 pub extern crate ndarray_rand;
 pub extern crate ndarray_linalg;
+pub extern crate ndarray_parallel;
+pub extern crate rayon;
 pub extern crate rand;
 pub extern crate statrs;
 pub extern crate num_traits;
-
 
 use pyo3::prelude::*;
 use pyo3::py::modinit as pymodinit;

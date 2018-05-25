@@ -13,5 +13,7 @@ statrs = "0.9.0"
 ndarray = "0.11.1"
 ndarray-rand = "0.7.0"
 ndarray-linalg = "0.9.0"
+ndarray-parallel = "0.8.0"
+rayon = "1.0.1"
 num-traits = "0.2.4"
 pyo3 = {version="0.2.7", features=["extension-module"]}

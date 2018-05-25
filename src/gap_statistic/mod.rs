@@ -7,6 +7,7 @@ use ndarray_rand::RandomExt;
 use rand::distributions::Range;
 use num_traits::pow::Pow;
 use statrs::statistics::Statistics;
+use ndarray_parallel::prelude::*;
 
 use kmeans::{KMeans, Centroid};
 
@@ -40,11 +41,13 @@ pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)
         (Higher the gap value, the better!)
     */
     let data = convert_2d_vec_to_array(data);
+    let cluster_range = Array1::from_vec(cluster_range);
 
     // Get gap values for each cluster in range.
+
     let gap_values = cluster_range
-        .iter()
-        .map(|n_clusters| (*n_clusters, calculate_gap(&data, *n_clusters)))
+        .into_par_iter()
+        .map(|n_clusters| (n_clusters.clone(), calculate_gap(&data, n_clusters.clone())))
         .collect::<Vec<(u32, f64)>>();
 
     gap_values
