@@ -40,3 +40,14 @@ conda install -c milesgranger gap-stat
 pip uninstall gap-stat
 ```
 
+Change Log:
+
+- 1.0.1
+  - Sept 2017 - Initial release; pure python featuring parallel backends 'joblib' and 'multiprocessing'
+  - Dependencies: 
+    - numpy
+    - scipy
+    - pandas
+    - joblib (optional)
+  - Install: `pip install gap-stat==1.0.1`
+
