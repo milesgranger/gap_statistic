@@ -19,7 +19,7 @@ using the gap statistic.
 
 ---
 #### Install:  
-Bleeding edge:  
+Bleeding edge: **Will require Rust the latest rust nightly; and highly unstable!**
 ```commandline
 pip install git+git://github.com/milesgranger/gap_statistic.git
 ```
