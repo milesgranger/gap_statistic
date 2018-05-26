@@ -1,0 +1,3 @@
+*.ipynb linguist-documentation
+*.rs rust
+*.py python
