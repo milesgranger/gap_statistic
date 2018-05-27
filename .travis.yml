@@ -16,7 +16,7 @@ matrix:
     # Build for 64bit linux Python 3.5, 3.6
     - os: linux
       sudo: required
-      language: generic
+      language: python
       services:
         - docker
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
@@ -24,7 +24,7 @@ matrix:
     # Build for 32 linux Python 3.5, 3.6
     - os: linux
       sudo: required
-      lanaguage: generic
+      lanaguage: python
       services:
         - docker
       env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
@@ -38,3 +38,14 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./build-wheels.sh $TRAVIS_OS_NAME; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --rm -v $(pwd):/io $DOCKER_IMAGE $PRE_CMD bash /io/build-wheels.sh $TRAVIS_OS_NAME; fi
   - ls -lhs ./dist
+
+before_deploy:
+  - sudo pip install twine
+
+deploy:
+  provider: pypi
+  user: milesg
+  password:
+    secure: "H6ceDixl2SXJTUC5k00Cg8irl1k3iFQmFqCrTcHC00L4GupQgT47asPOIAaQxAfXK1k1YvjJuko4iliiuy7gCPROlicnEdqQWIbOl5R0NABaVf7ifGZE/q51Qcay+t62UDK3k574MxJwdY+tVJS5AiIF1NWGtBtQNXJs2EDwCQk/z62ERWKAbDaG6/NfikyuQlLxps5fmffBy4kMnm3JtURW3SKf8LEN55yRffIs8GzqygjoMdvGfMlNRj629QRhv+hcoc8mgswqbcqCKY1BxB3l7HW0kQdDAICmxa5fk5BeV/7rgt5m2Kd6bBooHCEXXZ0obP2YqzBG1OysCPbiUhVqpqaFat2tFpSLOby18O0ASvJXHr5D6B+8fjXQXoWBCpBhHZ1E5eqfPu76q34rwM+IXC7SVdAueHLYVrA0dc5SZu5M1K/ZEIqwZ8o+kS2HEaXZsexRfdpj6VHCU3T4curr7W5DzUOweUlU3wn0hgPE9ycdk/dJ5vEsoZDwz+HN6w+2q6ImZuZzPIGqm/uajyQ1eApSIAE08y8PgCJXLBdAbPYNyox8eQWPhMVGsB18wV4DIIIukqNNIQ0T/SMNMExJ7uFo+bSLa63810FtExmzipoQC1ZcSGsYeb71xz5PzyPPSGEtmBmFK1g/qy3tH12/NVh9KWVpWGE9h75gfto="
+  distributions: "bdist_wheel"
+  skip_cleanup: true
