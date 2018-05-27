@@ -1,35 +1,29 @@
 cache: cargo
-
 matrix:
+
   include:
 
-    # Build for OSX Python 3.5
-    - os: osx
-      language: generic
-      env: PYTHON_VERSION=3.5
+  - os: osx
+    language: generic
+    env: PYTHON_VERSION=3.5
 
-    # Build for OSX Python 3.6
-    - os: osx
-      language: generic
-      env: PYTHON_VERSION=3.6
+  - os: osx
+    language: generic
+    env: PYTHON_VERSION=3.6
 
-    # Build for 64bit linux Python 3.5, 3.6
-    - os: linux
-      sudo: required
-      language: python
-      services:
-        - docker
-      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+  - os: linux
+    sudo: required
+    language: python
+    services:
+      - docker
+    env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 
-    # Build for 32 linux Python 3.5, 3.6
-    - os: linux
-      sudo: required
-      lanaguage: python
-      services:
-        - docker
-      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
-           PRE_CMD=linux32
-
+  - os: linux
+    sudo: required
+    lanaguage: python
+    services:
+      - docker
+    env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686 PRE_CMD=linux32
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull $DOCKER_IMAGE; fi
@@ -43,9 +37,22 @@ before_deploy:
   - sudo pip install twine
 
 deploy:
-  provider: pypi
-  user: milesg
-  password:
-    secure: "H6ceDixl2SXJTUC5k00Cg8irl1k3iFQmFqCrTcHC00L4GupQgT47asPOIAaQxAfXK1k1YvjJuko4iliiuy7gCPROlicnEdqQWIbOl5R0NABaVf7ifGZE/q51Qcay+t62UDK3k574MxJwdY+tVJS5AiIF1NWGtBtQNXJs2EDwCQk/z62ERWKAbDaG6/NfikyuQlLxps5fmffBy4kMnm3JtURW3SKf8LEN55yRffIs8GzqygjoMdvGfMlNRj629QRhv+hcoc8mgswqbcqCKY1BxB3l7HW0kQdDAICmxa5fk5BeV/7rgt5m2Kd6bBooHCEXXZ0obP2YqzBG1OysCPbiUhVqpqaFat2tFpSLOby18O0ASvJXHr5D6B+8fjXQXoWBCpBhHZ1E5eqfPu76q34rwM+IXC7SVdAueHLYVrA0dc5SZu5M1K/ZEIqwZ8o+kS2HEaXZsexRfdpj6VHCU3T4curr7W5DzUOweUlU3wn0hgPE9ycdk/dJ5vEsoZDwz+HN6w+2q6ImZuZzPIGqm/uajyQ1eApSIAE08y8PgCJXLBdAbPYNyox8eQWPhMVGsB18wV4DIIIukqNNIQ0T/SMNMExJ7uFo+bSLa63810FtExmzipoQC1ZcSGsYeb71xz5PzyPPSGEtmBmFK1g/qy3tH12/NVh9KWVpWGE9h75gfto="
-  distributions: "bdist_wheel"
-  skip_cleanup: true
+
+  - provider: pypi
+    user: milesg
+    password:
+      secure: H6ceDixl2SXJTUC5k00Cg8irl1k3iFQmFqCrTcHC00L4GupQgT47asPOIAaQxAfXK1k1YvjJuko4iliiuy7gCPROlicnEdqQWIbOl5R0NABaVf7ifGZE/q51Qcay+t62UDK3k574MxJwdY+tVJS5AiIF1NWGtBtQNXJs2EDwCQk/z62ERWKAbDaG6/NfikyuQlLxps5fmffBy4kMnm3JtURW3SKf8LEN55yRffIs8GzqygjoMdvGfMlNRj629QRhv+hcoc8mgswqbcqCKY1BxB3l7HW0kQdDAICmxa5fk5BeV/7rgt5m2Kd6bBooHCEXXZ0obP2YqzBG1OysCPbiUhVqpqaFat2tFpSLOby18O0ASvJXHr5D6B+8fjXQXoWBCpBhHZ1E5eqfPu76q34rwM+IXC7SVdAueHLYVrA0dc5SZu5M1K/ZEIqwZ8o+kS2HEaXZsexRfdpj6VHCU3T4curr7W5DzUOweUlU3wn0hgPE9ycdk/dJ5vEsoZDwz+HN6w+2q6ImZuZzPIGqm/uajyQ1eApSIAE08y8PgCJXLBdAbPYNyox8eQWPhMVGsB18wV4DIIIukqNNIQ0T/SMNMExJ7uFo+bSLa63810FtExmzipoQC1ZcSGsYeb71xz5PzyPPSGEtmBmFK1g/qy3tH12/NVh9KWVpWGE9h75gfto=
+    distributions: bdist_wheel
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: milesgranger/gap_statistic
+
+  - provider: s3
+    access_key_id: AKIAIO4W5UA24ZLJJMOQ
+    secret_access_key:
+      secure: rQ8o73VA4vekBzW/4GrUHiq+eh92JTorGQw6N3465mxdI1C7WUhnCpmyu7TNsm/KFl9wJven2l3iZ8Yl4oDThchJNItNVSmAw1Ta1iNBNMvGFs7uTtu8V0iPD8FvFhXW4dukQo1/4drcTqhr/KcaFT7kb5ajW19P2tL6lMt8XY0JDLxvWCQdq9SzKmaLp4dY2MRpHHw0wTeBvTSb0xTUejQ8sysIPgInpeF7rPmsM+w+t1H2jXPCG7VNYS32AsKPAvTH60nxJf5cv35+bRsrWhFAsSPGTYoF44EIy0zJWQXJby5yXAhj4p/wpPNRTCD8guUXZf6ER7XxkjhVTyff767tmNiVszR1JidI+W5iZsDtsEASLUz2jTfh7p6puPDJVYo8w1H0k/LvC1ud2PVh2X2gTHgang8gjmbSmiXhn4DXtwlKCiO0cnXFusnrkHF4+6PlnIUqdqFp/JbDfACt5D3wkppcngiYRp57WX2fe0ROEdeRr6XWcQEMFrdMGcLj9xfuqFwUO7phDAaCabMBLXX1EMjMovlmCXUh4zcmvQNeu1++9+Hw/kIYMm7HchqUCYPbyk9t5PvNV1XYRewqoQKmPoX3A6wAhHbELNuQGvVcCbww89cy0/Kr1em2r6pQBLT9C6G985/0ksqVrQw/Lt+Qg9ZE1za8rAMhebIKbls=
+    bucket: gap-stat-builds
+    local-dir: dist
+    upload-dir: wheels
+    skip_cleanup: true
