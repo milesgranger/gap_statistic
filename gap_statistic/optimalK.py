@@ -10,6 +10,7 @@ from scipy.cluster.vq import kmeans2
 try:
     from joblib import Parallel, delayed
 except ImportError:
+    Parallel, delayed = None, None
     warnings.warn('joblib not installed, will be unavailable as a backend for parallel processing.')
 
 
@@ -124,6 +125,9 @@ class OptimalK:
         """
         Process calling of .calculate_gap() method using the joblib backend
         """
+        if Parallel is None:
+            raise EnvironmentError('joblib is not installed; cannot use joblib as the parallel backend!')
+
         with Parallel(n_jobs=self.n_jobs) as parallel:
             for gap_value, n_clusters in parallel(delayed(self._calculate_gap)(X, n_refs, n_clusters)
                                                   for n_clusters in cluster_array):

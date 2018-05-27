@@ -1,23 +1,40 @@
-language: rust
-
-rust:
-  - nightly
-
-# TODO: Add matrix to test with multiple python versions
 cache: cargo
 
+matrix:
+  include:
+
+    # Build for OSX Python 3.5
+    - os: osx
+      language: generic
+      env: PYTHON_VERSION=3.5
+
+    # Build for OSX Python 3.6
+    - os: osx
+      language: generic
+      env: PYTHON_VERSION=3.6
+
+    # Build for 64bit linux Python 3.5, 3.6
+    - os: linux
+      sudo: required
+      language: generic
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+
+    # Build for 32 linux Python 3.5, 3.6
+    - os: linux
+      sudo: required
+      lanaguage: generic
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
+           PRE_CMD=linux32
+
+
 install:
-  - sudo apt-get update
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -bp $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-  - conda create -q -n test-environment python=3.5 -y
-  - source activate test-environment
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker pull $DOCKER_IMAGE; fi
 
 script:
-  - cargo test
-  - python setup.py test
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./build-wheels.sh $TRAVIS_OS_NAME; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --rm -v $(pwd):/io $DOCKER_IMAGE $PRE_CMD bash /io/build-wheels.sh $TRAVIS_OS_NAME; fi
+  - ls -lhs ./dist
