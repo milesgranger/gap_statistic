@@ -40,14 +40,26 @@ conda install -c milesgranger gap-stat
 pip uninstall gap-stat
 ```
 
+
 Change Log:
 
 - 1.0.1
-  - Sept 2017 - Initial release; pure python featuring parallel backends 'joblib' and 'multiprocessing'
-  - Dependencies: 
-    - numpy
-    - scipy
-    - pandas
-    - joblib (optional)
-  - Install: `pip install gap-stat==1.0.1`
-
+    - Sept 2017 
+    - Initial release; pure python featuring parallel backends 'joblib' and 'multiprocessing'
+    - Dependencies: 
+        - numpy
+        - scipy
+        - pandas
+        - joblib (optional)
+    - Install: `pip install gap-stat==1.0.1`
+  
+- 1.5.0a1
+    - 27-May-2018
+    - First alpha of using Rust. `optimalK` now takes `"rust"` as an argument for the parallel_backend
+      This is the fastest backend, where joblib w/ scipy had ~7.5s in benchmark, Rust is ~4.5s
+    - Dependencies:
+        - numpy
+        - scipy
+        - pandas
+        - joblib (optional)
+    - Install: `pip install gap-stat==1.5.0a1` (Not available on Windows)
