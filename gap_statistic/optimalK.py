@@ -133,8 +133,8 @@ class OptimalK:
         """
         Process gap stat using pure rust
         """
-        for gap_value, n_clusters in gapstat.optimal_k(X, list(cluster_array)):
-            yield (gap_value, n_clusters)
+        for label, gap_value in gapstat.optimal_k(X, list(cluster_array)):
+            yield (gap_value, label)
 
     def _process_with_joblib(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
         """
