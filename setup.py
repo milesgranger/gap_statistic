@@ -1,5 +1,6 @@
 import sys
 from setuptools import setup
+from gap_statistic import __version__
 
 try:
     from setuptools_rust import RustExtension, Binding
@@ -14,7 +15,7 @@ except ImportError:
 
 
 setup(name='gap-stat',
-      version='2.0.0beta-v1',
+      version=__version__,
       author='Miles Granger',
       maintainer='Miles Granger',
       author_email='miles59923@gmail.com',
