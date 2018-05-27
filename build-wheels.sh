@@ -11,7 +11,6 @@ function install_rust {
 if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 
     brew update
-    brew install
     curl https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh --output miniconda.sh
     bash ./miniconda.sh -bp $HOME/anaconda
     export PATH="$HOME/anaconda/bin:$PATH"
@@ -19,6 +18,7 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     conda install -y virtualenv python==$PYTHON_VERSION
     virtualenv venv
     source ./venv/bin/activate
+    export PATH=$(pwd)/venv/bin:$PATH
     echo "Python version: $(python --version)"
     pip install -U pip setuptools wheel numpy scipy pandas joblib pytest
     install_rust nightly
