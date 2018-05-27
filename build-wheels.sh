@@ -20,7 +20,7 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     source ./venv/bin/activate
     export PATH=$(pwd)/venv/bin:$PATH
     echo "Python version: $(python --version)"
-    pip install -U pip setuptools wheel numpy scipy pandas joblib pytest scikit-learn
+    pip install -U pip setuptools setuptools-rust wheel numpy scipy pandas joblib pytest scikit-learn
     install_rust nightly
     pip wheel . -w ./dist/
     pip install -v gap-stat --no-index -f ./dist/

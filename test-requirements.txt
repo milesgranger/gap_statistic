@@ -1,0 +1,9 @@
+setuptools
+setuptools-rust
+wheel
+numpy
+scipy
+pandas
+joblib
+pytest
+scikit-learn
