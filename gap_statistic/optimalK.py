@@ -8,6 +8,10 @@ from multiprocessing import cpu_count
 from typing import Union, Iterable, Tuple
 from scipy.cluster.vq import kmeans2
 try:
+    from gap_statistic.rust import gapstat
+except ImportError:
+    warnings.warn('Rust binary not built, will not be able to use "rust" backend.')
+try:
     from joblib import Parallel, delayed
 except ImportError:
     Parallel, delayed = None, None
@@ -33,9 +37,11 @@ class OptimalK:
     def __init__(self, n_jobs: int=-1, parallel_backend: str='joblib') -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
-        :param n_jobs - int: Number of CPU cores to use. Use all cores if n_jobs == -1
+        if parallel_backend == 'rust' (fastest) default is to use all cores.
+
+        :param n_jobs - int: Number of CPU cores to use. Use all cores if n_jobs == -1 ignored if backend is 'rust'
         """
-        self.parallel_backend = parallel_backend if parallel_backend in ['joblib', 'multiprocessing'] else None
+        self.parallel_backend = parallel_backend if parallel_backend in ['joblib', 'multiprocessing', 'rust'] else None
         self.n_jobs = n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()  # type: int
         self.n_jobs = 1 if parallel_backend is None else self.n_jobs
 
@@ -70,6 +76,8 @@ class OptimalK:
             engine = self._process_with_joblib
         elif self.parallel_backend == 'multiprocessing':
             engine = self._process_with_multiprocessing
+        elif self.parallel_backend == 'rust':
+            engine = self._process_with_rust
         else:
             engine = self._process_non_parallel
 
@@ -120,6 +128,13 @@ class OptimalK:
         gap_value = np.log(np.mean(ref_dispersions)) - np.log(dispersion)
 
         return gap_value, int(n_clusters)
+
+    def _process_with_rust(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
+        """
+        Process gap stat using pure rust
+        """
+        for gap_value, n_clusters in gapstat.optimal_k(X, list(cluster_array)):
+            yield (gap_value, n_clusters)
 
     def _process_with_joblib(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
         """

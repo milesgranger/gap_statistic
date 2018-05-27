@@ -11,6 +11,7 @@ function install_rust {
 if [[ $TRAVIS_OS_NAME == "osx" ]]; then
 
     brew update
+    brew install
     curl https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh --output miniconda.sh
     bash ./miniconda.sh -bp $HOME/anaconda
     export PATH="$HOME/anaconda/bin:$PATH"
@@ -19,12 +20,12 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     virtualenv venv
     source ./venv/bin/activate
     echo "Python version: $(python --version)"
-    pip install -U pip setuptools wheel numpy scipy pandas joblib
+    pip install -U pip setuptools wheel numpy scipy pandas joblib pytest
     install_rust nightly
     pip wheel . -w ./dist/
     pip install -v gap-stat --no-index -f ./dist/
     pip install -r "requirements.txt"
-    python setup.py test
+    pytest -vs
 
 else
 
@@ -42,7 +43,7 @@ else
         export PYTHON_LIB=$(${PYBIN}/python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
         export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB"
-        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib
+        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib pytest
         pushd /io
         "${PYBIN}/python" setup.py bdist_wheel --dist-dir /io/dist/
         popd
@@ -58,7 +59,7 @@ else
     for PYBIN in /opt/python/cp{35,36}*/bin/; do
         pushd /io
         "${PYBIN}/pip" install gap-stat --no-index -f /io/dist/
-        "${PYBIN}/python" setup.py test
+        "${PYBIN}/python" -m pytest -vs
         popd
     done
 

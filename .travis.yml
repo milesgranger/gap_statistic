@@ -34,7 +34,7 @@ script:
   - ls -lhs ./dist
 
 before_deploy:
-  - sudo pip install twine
+  - echo "pip version= $(pip --version)" || echo "pip not found!"
 
 deploy:
 
