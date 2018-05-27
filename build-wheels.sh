@@ -20,7 +20,7 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     source ./venv/bin/activate
     export PATH=$(pwd)/venv/bin:$PATH
     echo "Python version: $(python --version)"
-    pip install -U pip setuptools wheel numpy scipy pandas joblib pytest
+    pip install -U pip setuptools wheel numpy scipy pandas joblib pytest scikit-learn
     install_rust nightly
     pip wheel . -w ./dist/
     pip install -v gap-stat --no-index -f ./dist/
@@ -43,7 +43,7 @@ else
         export PYTHON_LIB=$(${PYBIN}/python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
         export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB"
-        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib pytest
+        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib pytest scikit-learn
         pushd /io
         "${PYBIN}/python" setup.py bdist_wheel --dist-dir /io/dist/
         popd
