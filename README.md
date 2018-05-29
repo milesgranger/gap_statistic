@@ -56,10 +56,12 @@ Change Log:
 - 1.5.0a(1,2)
     - 27-May-2018
     - First alpha of using Rust. `optimalK` now takes `"rust"` as an argument for the parallel_backend
-      This is the fastest backend, where joblib w/ scipy had ~7.5s in benchmark, Rust is ~4.5s
+      This is the fastest backend, where joblib w/ scipy had ~7.5s in benchmark, Rust is ~4.5s  
+      *Pre-built wheels for Linux & OSX for Python 3.5 & 3.6. Windows users can install but will need
+      Rust nightly in order to compile.*
     - Dependencies:
         - numpy
         - scipy
         - pandas
         - joblib (optional)
-    - Install: `pip install gap-stat==1.5.0a2` (Not available on Windows)
+    - Install: `pip install gap-stat==1.5.0a2`
