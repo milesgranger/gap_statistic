@@ -12,9 +12,9 @@ use ndarray_parallel::prelude::*;
 use kmeans::{KMeans, Centroid};
 
 // Kmeans Entry point
-pub fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32) -> (Vec<Centroid>, Vec<u32>) {
+pub fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, iter: u32) -> (Vec<Centroid>, Vec<u32>) {
 
-    let mut kmeans = KMeans::new(k, 0.001, max_iter);
+    let mut kmeans = KMeans::new(k, 0.001, max_iter, iter);
     kmeans.fit(&data);
     let labels = kmeans.predict(&data);
     (kmeans.centroids.expect("No centroids inside of KMeans model!").clone(), labels.clone())
@@ -67,12 +67,12 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
         let random_data = Array2::random(data.dim(), Range::new(-1_f64, 1_f64));
 
         // Get centroids from data, each centroid contains .point() and .label()
-        let (centroids, labels) = kmeans(&random_data, n_clusters, 10 );
+        let (centroids, labels) = kmeans(&random_data, n_clusters, 10 , 10);
         ref_dispersions[i] = calculate_dispersion(&random_data, labels, centroids);
     }
 
     // Do calculations for the actual data
-    let (centroids, labels) = kmeans(&data, n_clusters, 10);
+    let (centroids, labels) = kmeans(&data, n_clusters, 10, 10);
     let dispersion = calculate_dispersion(&data, labels, centroids);
 
 

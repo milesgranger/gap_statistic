@@ -23,9 +23,9 @@ pub mod gap_statistic;
 fn init_mod(py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "kmeans")]
-    fn kmeans_py(data: Vec<Vec<f64>>, k: u32, max_iter: u32) -> PyResult<Vec<u32>> {
+    fn kmeans_py(data: Vec<Vec<f64>>, k: u32, max_iter: u32, iter: u32) -> PyResult<Vec<u32>> {
         let data = gap_statistic::convert_2d_vec_to_array(data);
-        let (_centroids, labels) = gap_statistic::kmeans(&data, k, max_iter);
+        let (_centroids, labels) = gap_statistic::kmeans(&data, k, max_iter, iter);
         Ok(labels)
     }
 

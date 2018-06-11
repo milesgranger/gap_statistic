@@ -2,16 +2,29 @@ import sys
 from setuptools import setup
 from gap_statistic import __version__
 
-try:
-    from setuptools_rust import RustExtension, Binding
-except ImportError:
-    import subprocess
-    errno = subprocess.call([sys.executable, '-m', 'pip', 'install', 'setuptools-rust>=0.9.2'])
-    if errno:
-        print("Please install the 'setuptools-rust>=0.9.2' package")
-        raise SystemExit(errno)
-    else:
+import warnings
+import shutil
+
+setup_kwargs = {}
+
+if shutil.which('cargo'):
+    try:
         from setuptools_rust import RustExtension, Binding
+    except ImportError:
+        import subprocess
+        errno = subprocess.call([sys.executable, '-m', 'pip', 'install', 'setuptools-rust>=0.9.2'])
+        if errno:
+            print("Please install the 'setuptools-rust>=0.9.2' package")
+            raise SystemExit(errno)
+        else:
+            from setuptools_rust import RustExtension, Binding
+
+    setup_kwargs['rust_extensions'] = [
+              RustExtension('gap_statistic.rust.gapstat', 'Cargo.toml', binding=Binding.PyO3)
+          ]
+
+else:
+    warnings.warn('Cargo was not found on your system; to have the Rust backend, please install Rust\'s "Cargo" utility')
 
 
 setup(name='gap-stat',
@@ -24,9 +37,6 @@ setup(name='gap-stat',
       description='Python implementation of the gap statistic with Rust optimizations.',
       long_description='Uses the gap statistic method by Tibshirani, Walther, Hastie to suggest n_clusters.',
       packages=['gap_statistic'],
-      rust_extensions=[
-              RustExtension('gap_statistic.rust.gapstat', 'Cargo.toml', binding=Binding.PyO3)
-          ],
       license='BSD',
       url='https://github.com/milesgranger/gap_statistic',
       zip_safe=False,
@@ -51,4 +61,5 @@ setup(name='gap-stat',
             'Operating System :: Unix',
             'Operating System :: MacOS :: MacOS X',
       ],
+      **setup_kwargs
       )
