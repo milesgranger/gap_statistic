@@ -25,6 +25,7 @@ install:
   - set RUST_BACKTRACE=1
 
 build_script:
+  - pip install -r requirements.txt
   - python setup.py build_ext
 
 test_script:
