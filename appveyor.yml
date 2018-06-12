@@ -26,9 +26,9 @@ install:
 
 build_script:
   - pip install -r requirements.txt
+  - pip install setuptools-rust pytest pytest-benchmark
   - python setup.py build_ext
 
 test_script:
   - cargo test
-  - pip install setuptools-rust pytest pytest-benchmark
   - python setup.py install && pytest -v tests
