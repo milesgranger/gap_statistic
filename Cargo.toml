@@ -8,12 +8,11 @@ name = "gap_statistic"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = { version = "^0.11.1", features = ["blas"] }
+ndarray = { version = "^0.11.1" }
 ndarray-rand = "^0.7.0"
-ndarray-linalg = "^0.9.0"
+ndarray-linalg = {version = "^0.9.0"}
 ndarray-parallel = "^0.8.0"
 num-traits = "^0.2.4"
-openblas-src = { version = "^0.5.6", default-features = false, features = ["cblas", "system"] }
 pyo3 = {version="^0.2.7", features=["extension-module"]}
 rand = "^0.4.2"
 rayon = "^1.0.1"

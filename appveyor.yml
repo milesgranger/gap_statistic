@@ -1,4 +1,6 @@
 version: 0.2.{build}
+image:
+  - Visual Studio 2017
 environment:
   TARGET: x86_64-pc-windows-msvc
   matrix:
@@ -11,7 +13,8 @@ environment:
 install:
   - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - conda config --add channels conda-forge --force
-  - conda install --yes --quiet cmake flang jom lapack
+  - conda config --add channels intel --force
+  - conda install --yes --quiet cmake flang jom lapack mkl
   #- "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python --version"
   - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-nightly-${env:TARGET}.msi"
@@ -26,7 +29,7 @@ install:
 
 build_script:
   - pip install -r requirements.txt
-  - pip install setuptools-rust pytest pytest-benchmark
+  - pip install --upgrade setuptools-rust pytest pytest-benchmark
   - python setup.py build_ext
 
 test_script:
