@@ -12,7 +12,7 @@ install:
   - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - conda config --add channels conda-forge --force
   - conda install --yes --quiet cmake flang jom lapack
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  #- "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python --version"
   - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-nightly-${env:TARGET}.msi"
   - start /wait msiexec /i rust-nightly-%TARGET%.msi INSTALLDIR="%CD%\rust-nightly-%TARGET%" /quiet /qn /norestart
