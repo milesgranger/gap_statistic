@@ -8,7 +8,6 @@ use std::iter::Sum;
 use std::collections::HashMap;
 use ndarray::{Array1, Array2, Ix2, Zip, Axis, ArrayView1, ArrayView2};
 use ndarray_rand::RandomExt;
-use ndarray_linalg::norm;
 use rand::distributions::{Range};
 use rand;
 use rand::Rng;
@@ -299,13 +298,13 @@ impl KMeans {
         let mut distances = points
             .outer_iter()
             .map(|point|
-                norm::normalize((point.to_owned() - center.to_owned())
-                                    .into_shape((1, point.len()))
-                                    .expect("Unable to reshape!"),
-                                norm::NormalizeAxis::Row,
-                )
+                (point.to_owned() - center.to_owned())
+                    .to_vec()
+                    .iter()
+                    .map(|v| v.abs().powf(2_f64))
+                    .sum()
             )
-            .map(|(_, normalized)| (normalized[0] as f64).powf(2_f64))
+            .map(|normalized: f64| (normalized).powf(2_f64))
             .collect::<Vec<f64>>();
 
         // If previous distances were passed, return the lowest dist when compared against new distances
