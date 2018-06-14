@@ -9,16 +9,20 @@ source:
   sha256: 2a288145de3ebadc81b38ca5e070c69fd5e82c1603d071d3aa0bcf1cd5976726
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
-    - python>=3.5
+    - python
+    - setuptools
     - rust
   run:
     - python
 
-
 test:
   imports:
     - gap_statistic
+
+about:
+  home: http://github.com/
+  license: Apache Software License
