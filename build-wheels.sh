@@ -57,10 +57,10 @@ else
 
     # Install packages and test
     for PYBIN in /opt/python/cp{35,36}*/bin/; do
-        pushd /io
+        #pushd /io
         "${PYBIN}/pip" install gap-stat --no-index -f /io/dist/
-        "${PYBIN}/python" -m pytest -vs
-        popd
+        "${PYBIN}/python" -m pytest /io/gap_statistic/tests -vs
+        #popd
     done
 
 fi
