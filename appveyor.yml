@@ -34,10 +34,9 @@ build_script:
 
 test_script:
   - cargo test
-  - SET PROJPATH=C:\Projects\gap_statistic
-  - cd c:\projects
-  - python -m pip -v install gap_statistic --no-index -f "${env:PROJPATH}\wheelhouse"
-  - python -m pytest "${env:PROJPATH}\tests"
+  - python -m pip -v install gap-stat --no-index -f wheelhouse
+  - python -m pip install scikit-learn scipy numpy pandas joblib
+  - python -m pytest tests
 
 artifacts:
   - path: wheelhouse\gap*.whl

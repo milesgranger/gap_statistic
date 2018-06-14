@@ -22,10 +22,10 @@ if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     echo "Python version: $(python --version)"
     pip install -U pip setuptools setuptools-rust wheel numpy scipy pandas joblib pytest scikit-learn
     install_rust nightly
-    pip wheel . -w ./dist/
-    pip install -v gap-stat --no-index -f ./dist/
+    pip wheel . -w ./wheelhouse/
+    pip install -v gap-stat --no-index -f ./wheelhouse/
     pip install -r "requirements.txt"
-    pytest -vs
+    pytest tests -vs
 
 else
 
@@ -43,24 +43,26 @@ else
         export PYTHON_LIB=$(${PYBIN}/python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
         export LIBRARY_PATH="$LIBRARY_PATH:$PYTHON_LIB"
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PYTHON_LIB"
-        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib pytest scikit-learn
         pushd /io
-        "${PYBIN}/python" setup.py bdist_wheel --dist-dir /io/dist/
+        "${PYBIN}/pip" install -U  setuptools setuptools-rust wheel numpy scipy pandas joblib pytest scikit-learn
+        "${PYBIN}/python" setup.py bdist_wheel --dist-dir /io/wheelhouse/
         popd
     done
 
     # Bundle external shared libraries into the wheels
-    for whl in /io/dist/gap*.whl; do
+    for whl in /io/wheelhouse/gap*.whl; do
         echo "Auditing wheel ${whl}"
-        auditwheel repair "$whl" -w /io/dist/
+        auditwheel repair "$whl" -w /io/wheelhouse/
     done
 
     # Install packages and test
     for PYBIN in /opt/python/cp{35,36}*/bin/; do
-        #pushd /io
-        "${PYBIN}/pip" install gap-stat --no-index -f /io/dist/
-        "${PYBIN}/python" -m pytest /io/gap_statistic/tests -vs
-        #popd
+        pushd /io
+        "${PYBIN}/pip" uninstall gap-stat
+        "${PYBIN}/pip" install gap-stat --no-index -f /io/wheelhouse
+        # Actually require glibc 2.14 which isn't available yet on Centos...
+        #"${PYBIN}/python" -m pytest tests -vs
+        popd
     done
 
 fi

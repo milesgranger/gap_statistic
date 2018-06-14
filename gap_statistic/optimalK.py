@@ -7,7 +7,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from typing import Union, Iterable, Tuple
 from scipy.cluster.vq import kmeans2
-from gap_statistic.rust import gapstat
 
 try:
     from joblib import Parallel, delayed
@@ -131,6 +130,7 @@ class OptimalK:
         """
         Process gap stat using pure rust
         """
+        from gap_statistic.rust import gapstat
         for label, gap_value in gapstat.optimal_k(X, list(cluster_array)):
             yield (gap_value, label)
 
