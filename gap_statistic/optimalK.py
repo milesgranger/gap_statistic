@@ -7,10 +7,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from typing import Union, Iterable, Tuple
 from scipy.cluster.vq import kmeans2
-try:
-    from gap_statistic.rust import gapstat
-except ImportError:
-    warnings.warn('Rust binary not built, will not be able to use "rust" backend.')
+from gap_statistic.rust import gapstat
+
 try:
     from joblib import Parallel, delayed
 except ImportError:

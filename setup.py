@@ -36,7 +36,7 @@ setup(name='gap-stat',
       test_suite='tests',
       include_package_data=True,
       classifiers=[
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 5 - Production/Stable',
             'Intended Audience :: Developers',
             'Intended Audience :: Financial and Insurance Industry',
             'Intended Audience :: Information Technology',

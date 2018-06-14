@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-rustc -v
-cargo -v
-rustup -v
+rustc -V
+cargo -V
+rustup -V
 cargo build --release --verbose
