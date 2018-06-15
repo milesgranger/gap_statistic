@@ -54,6 +54,7 @@ Change Log:
         - pandas
         - joblib (optional)
     - Install: `pip install gap-stat==1.0.1`
+    - OR conda install -c milesgranger gap-stat==1.0.1
   
 - 1.5.0a(1,2)
     - 27-May-2018
@@ -68,14 +69,13 @@ Change Log:
         - joblib (optional)
     - Install: `pip install gap-stat==1.5.0a2` (Not available on Windows)
     
-- 1.5.0
+- 1.5.1
     - June-2018
+    - First stable release with Rust backend. OptimalK now takes `backend="rust"`
     - More tests, add best init in rust kmeans impl for better stability between runs
     - Dependencies:
         - numpy
         - scipy
         - pandas
         - joblib (optional)
-    - Install `pip install gap-stat==1.5.0` 
-        - *(Windows users will not have the Rust backend  
-      unless they have Rust nightly available; OSX and Linux have pre-compiled wheels)*
+    - Install `pip install gap-stat==1.5.1`
