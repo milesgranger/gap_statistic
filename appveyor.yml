@@ -34,9 +34,10 @@ build_script:
 
 test_script:
   - cargo test
-  - python -m pip -v install gap-stat --no-index -f wheelhouse
+  - python -m pip -v install gap-stat --no-index -f C:\projects\gap-statistic\wheelhouse
   - python -m pip install scikit-learn scipy numpy pandas joblib
-  - python -m pytest tests
+  - cd ..
+  - python -m pytest C:\projects\gap-statistic\tests
 
 artifacts:
   - path: wheelhouse\gap*.whl

@@ -60,7 +60,8 @@ else
         pushd /io
         "${PYBIN}/pip" uninstall gap-stat
         "${PYBIN}/pip" install gap-stat --no-index -f /io/wheelhouse
-        # Actually require glibc 2.14 which isn't available yet on Centos...
+        # Actually requires glibc 2.14 which isn't available on Centos 5...
+        # The tests are ran on OSX and Windows, so this is ok for now.
         #"${PYBIN}/python" -m pytest tests -vs
         popd
     done
