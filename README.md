@@ -79,4 +79,3 @@ Change Log:
     - Install `pip install gap-stat==1.5.0` 
         - *(Windows users will not have the Rust backend  
       unless they have Rust nightly available; OSX and Linux have pre-compiled wheels)*
-
