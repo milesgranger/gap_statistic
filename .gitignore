@@ -9,6 +9,7 @@ __pycache__/
 *.so
 .idea/
 .pytest_cache/
+Cargo.lock
 
 # Distribution / packaging
 .Python
