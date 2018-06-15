@@ -6,7 +6,8 @@ import pytest
     "parallel_backend, n_jobs, n_clusters", [
         pytest.param('joblib', -1, 3, id="parallel_backend='joblib', n_jobs=-1, n_clusters=2"),
         pytest.param('multiprocessing', -1, 3, id="parallel_backend='multiprocessing', n_jobs=-1, n_clusters=2"),
-        pytest.param(None, -1, 3, id="parallel_backend=None, n_jobs=-1, n_clusters=2")
+        pytest.param(None, -1, 3, id="parallel_backend=None, n_jobs=-1, n_clusters=2"),
+        pytest.param('rust', -1, 3, id="parallel_backend='rust', n_jobs=-1, n_clusters=2")
     ]
 )
 def test_optimalk(parallel_backend, n_jobs, n_clusters):

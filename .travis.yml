@@ -32,7 +32,7 @@ install:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./build-wheels.sh $TRAVIS_OS_NAME; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run --rm -v $(pwd):/io $DOCKER_IMAGE $PRE_CMD bash /io/build-wheels.sh $TRAVIS_OS_NAME; fi
-  - ls -lhs ./dist
+  - ls -lhs ./wheelhouse
 
 before_deploy:
   - echo "pip version= $(pip --version)" || echo "pip not found!"
@@ -54,7 +54,7 @@ deploy:
     secret_access_key:
       secure: rQ8o73VA4vekBzW/4GrUHiq+eh92JTorGQw6N3465mxdI1C7WUhnCpmyu7TNsm/KFl9wJven2l3iZ8Yl4oDThchJNItNVSmAw1Ta1iNBNMvGFs7uTtu8V0iPD8FvFhXW4dukQo1/4drcTqhr/KcaFT7kb5ajW19P2tL6lMt8XY0JDLxvWCQdq9SzKmaLp4dY2MRpHHw0wTeBvTSb0xTUejQ8sysIPgInpeF7rPmsM+w+t1H2jXPCG7VNYS32AsKPAvTH60nxJf5cv35+bRsrWhFAsSPGTYoF44EIy0zJWQXJby5yXAhj4p/wpPNRTCD8guUXZf6ER7XxkjhVTyff767tmNiVszR1JidI+W5iZsDtsEASLUz2jTfh7p6puPDJVYo8w1H0k/LvC1ud2PVh2X2gTHgang8gjmbSmiXhn4DXtwlKCiO0cnXFusnrkHF4+6PlnIUqdqFp/JbDfACt5D3wkppcngiYRp57WX2fe0ROEdeRr6XWcQEMFrdMGcLj9xfuqFwUO7phDAaCabMBLXX1EMjMovlmCXUh4zcmvQNeu1++9+Hw/kIYMm7HchqUCYPbyk9t5PvNV1XYRewqoQKmPoX3A6wAhHbELNuQGvVcCbww89cy0/Kr1em2r6pQBLT9C6G985/0ksqVrQw/Lt+Qg9ZE1za8rAMhebIKbls=
     bucket: "gap-stat-builds"
-    local_dir: dist
+    local_dir: wheelhouse
     upload-dir: wheels/$TRAVIS_BRANCH
     skip_cleanup: true
     region: "eu-west-1"

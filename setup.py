@@ -25,8 +25,8 @@ setup(name='gap-stat',
       long_description='Uses the gap statistic method by Tibshirani, Walther, Hastie to suggest n_clusters.',
       packages=['gap_statistic'],
       rust_extensions=[
-              RustExtension('gap_statistic.rust.gapstat', 'Cargo.toml', binding=Binding.PyO3)
-          ],
+          RustExtension('gap_statistic.rust.gapstat', 'Cargo.toml', binding=Binding.PyO3)
+      ],
       license='BSD',
       url='https://github.com/milesgranger/gap_statistic',
       zip_safe=False,
@@ -36,7 +36,7 @@ setup(name='gap-stat',
       test_suite='tests',
       include_package_data=True,
       classifiers=[
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 5 - Production/Stable',
             'Intended Audience :: Developers',
             'Intended Audience :: Financial and Insurance Industry',
             'Intended Audience :: Information Technology',

@@ -7,8 +7,10 @@ __pycache__/
 
 # C extensions
 *.so
+wheelhouse/
 .idea/
 .pytest_cache/
+Cargo.lock
 
 # Distribution / packaging
 .Python

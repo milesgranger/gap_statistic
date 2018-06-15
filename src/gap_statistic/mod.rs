@@ -12,9 +12,9 @@ use ndarray_parallel::prelude::*;
 use kmeans::{KMeans, Centroid};
 
 // Kmeans Entry point
-pub fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32) -> (Vec<Centroid>, Vec<u32>) {
+pub fn kmeans<'a>(data: &'a Array2<f64>, k: u32, max_iter: u32, iter: u32) -> (Vec<Centroid>, Vec<u32>) {
 
-    let mut kmeans = KMeans::new(k, 0.001, max_iter);
+    let mut kmeans = KMeans::new(k, 0.001, max_iter, iter);
     kmeans.fit(&data);
     let labels = kmeans.predict(&data);
     (kmeans.centroids.expect("No centroids inside of KMeans model!").clone(), labels.clone())
@@ -34,7 +34,7 @@ pub fn convert_2d_vec_to_array(data: Vec<Vec<f64>>) -> Array2<f64> {
 }
 
 
-pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)> {
+pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>, iter: u32) -> Vec<(u32, f64)> {
     /*
         Given 2d data and a cluster range, return a vector of tuples
         where the first element represents n_clusters, and second represents the gap value.
@@ -47,7 +47,7 @@ pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)
 
     let gap_values = cluster_range
         .into_par_iter()
-        .map(|n_clusters| (n_clusters.clone(), calculate_gap(&data, n_clusters.clone())))
+        .map(|n_clusters| (n_clusters.clone(), calculate_gap(&data, n_clusters.clone(), iter.clone())))
         .collect::<Vec<(u32, f64)>>();
 
     gap_values
@@ -55,7 +55,7 @@ pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>) -> Vec<(u32, f64)
 
 
 // Calculate the gap value
-fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
+fn calculate_gap(data: &Array2<f64>, n_clusters: u32, iter: u32) -> f64 {
 
     let n_refs = 5; // TODO: Add this as parameter
     let mut ref_dispersions = Array1::zeros((n_refs,));
@@ -67,12 +67,12 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32) -> f64 {
         let random_data = Array2::random(data.dim(), Range::new(-1_f64, 1_f64));
 
         // Get centroids from data, each centroid contains .point() and .label()
-        let (centroids, labels) = kmeans(&random_data, n_clusters, 10 );
+        let (centroids, labels) = kmeans(&random_data, n_clusters, 5 , iter);
         ref_dispersions[i] = calculate_dispersion(&random_data, labels, centroids);
     }
 
     // Do calculations for the actual data
-    let (centroids, labels) = kmeans(&data, n_clusters, 10);
+    let (centroids, labels) = kmeans(&data, n_clusters, 5, iter);
     let dispersion = calculate_dispersion(&data, labels, centroids);
 
 

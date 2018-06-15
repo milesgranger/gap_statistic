@@ -2,10 +2,12 @@
 
 use std::f64;
 use std::ops::Index;
+use std::cmp::PartialOrd;
+use std::iter;
 use std::iter::Sum;
+use std::collections::HashMap;
 use ndarray::{Array1, Array2, Ix2, Zip, Axis, ArrayView1, ArrayView2};
 use ndarray_rand::RandomExt;
-use ndarray_linalg::norm;
 use rand::distributions::{Range};
 use rand;
 use rand::Rng;
@@ -82,18 +84,26 @@ pub struct KMeans {
     pub k: u32,
     pub tolerance: f64,
     pub max_iter: u32,
-    pub centroids: Option<Vec<Centroid>>
+    pub centroids: Option<Vec<Centroid>>,
+    pub iter: u32
 }
 
 impl KMeans {
 
-    pub fn new(k: u32, tolerance: f64, max_iter: u32) -> Self {
-
+    pub fn new(k: u32, tolerance: f64, max_iter: u32, iter: u32) -> Self {
+        /*
+            k:          Number of clusters
+            tolerance:  A centroid must move this much before being updated, otherwise considered stable
+            max_iter:   The maximum iterations over dataset to update centroids
+            iter:       Number of times to repeat kmeans to find best init cycle to try and minimize dist
+                        between points and their centroids
+        */
         KMeans{
             k,
             tolerance,
             max_iter,
-            centroids: None
+            iter,
+            centroids: None,
         }
     }
 
@@ -101,56 +111,78 @@ impl KMeans {
         /*
             Fit KMeans model to data
         */
+        let mut lowest_error = f64::MAX;
+        let mut labels = Vec::with_capacity(data.shape()[0]);
 
-        // Initialize centroids based on data passed
-        self.centroids = Some(self.init_centroids(&data));
+        for n_iteration in 0..self.iter {
 
-        // Try to converge centroids up to max_iter
-        for i in 0..self.max_iter {
+            // Initialize centroids; keep track of the starting point
+            let idx = rand::thread_rng().gen_range(0, data.shape()[0]) as usize;
+            self.centroids = Some(self.init_centroids(&data, idx));
 
-            // Get current centroid assignments for data
-            let labels = self.predict(&data);
-            let mut n_stable = 0;
 
-            // Assuming we have initialized centroids...
-            if let Some(ref mut centroids) = self.centroids {
+            // Try to converge centroids up to max_iter
+            for i in 0..self.max_iter {
 
-                // Iter over centroids, collecting points assigned to that cluster, and then
-                // update the centroid center.
-                for ref mut centroid in centroids {
+                // Get current centroid assignments for data
+                labels = self.predict(&data);
+                let mut n_stable = 0;
 
-                    // Find indexes of points beloning to current centroid
-                    let filtered_points = labels.iter()
-                        .zip(data.outer_iter())
-                        .enumerate()
-                        .filter_map(|(idx, (label, point))| {
-                            match *label == centroid.label {
-                                true => Some(idx as usize),
-                                false => None
-                            }
-                        })
-                        .collect::<Vec<usize>>();
 
-                    // Fetch those points and update centroid
-                    let points = data.select(Axis(0), &filtered_points);
+                // Assuming we have initialized centroids...
+                if let Some(ref mut centroids) = self.centroids {
 
-                    // Check if cluster has any assigned points, update if so.
-                    // TODO: In theory, this probably should never happen..check why it does here sometimes.
-                    if !&points.is_empty() {
-                        centroid.update(&points);
-                    }
+                    // Iter over centroids, collecting points assigned to that cluster, and then
+                    // update the centroid center.
+                    for ref mut centroid in centroids {
 
-                    if centroid.stable {
-                        n_stable += 1;
+                        // Find indexes of points beloning to current centroid
+                        let filtered_points = labels.iter()
+                            .zip(data.outer_iter())
+                            .enumerate()
+                            .filter_map(|(idx, (label, point))| {
+                                match *label == centroid.label {
+                                    true => Some(idx as usize),
+                                    false => None
+                                }
+                            })
+                            .collect::<Vec<usize>>();
+
+                        // Fetch those points and update centroid
+                        let points = data.select(Axis(0), &filtered_points);
+
+                        // Check if cluster has any assigned points, update if so.
+                        if !&points.is_empty() {
+                            centroid.update(&points);
+                        }
+
+                        if centroid.stable {
+                            n_stable += 1;
+                        }
                     }
                 }
+
+                // Check if all centroids are converged, and break if so.
+                if n_stable == self.k {
+                    break
+                }
+
+            }  // End of max iter attempts for centroid stabilization
+
+            let centroids = self.centroids.clone().unwrap();
+            let error = iter::repeat(&centroids)
+                    .zip(labels.iter())
+                    .zip(data.outer_iter())
+                    .map(|((centroids, label), point)|
+                             Centroid::distance(&centroids[*label as usize].center.view(), &point))
+                    .sum::<f64>();
+            if error < lowest_error {
+                lowest_error = error;
+                self.centroids = Some(centroids);
             }
 
-            // Check if all centroids are converged, and break if so.
-            if n_stable == self.k {
-                break
-            }
-        }
+        }  // End of kmeans iterations for best init
+
     }
 
     pub fn predict(&self, data: &Array2<f64>) -> Vec<u32> {
@@ -183,13 +215,20 @@ impl KMeans {
         classifications
     }
 
-    fn init_centroids(&mut self, data: &Array2<f64>) -> Vec<Centroid> {
+    fn calculate_error(&self) -> f64 {
+        /*
+            Given centroids and their assigned points, calculate the total distance as error.
+        */
+        6.5
+    }
+
+    fn init_centroids(&mut self, data: &Array2<f64>, start_idx: usize) -> Vec<Centroid> {
 
         // Set vector of indices representing points to be assigned to centroids
         let mut indices = Vec::with_capacity(self.k as usize);
 
-        // Choose first point at random.
-        indices.push(rand::thread_rng().gen_range(0, data.shape()[0]) as usize);
+        // Choose first point at random if not passed directly
+        indices.push(start_idx);
 
         // Start choosing new centroid locations based on k-means++
         let distances = None;
@@ -259,13 +298,13 @@ impl KMeans {
         let mut distances = points
             .outer_iter()
             .map(|point|
-                norm::normalize((point.to_owned() - center.to_owned())
-                                    .into_shape((1, point.len()))
-                                    .expect("Unable to reshape!"),
-                                norm::NormalizeAxis::Row,
-                )
+                (point.to_owned() - center.to_owned())
+                    .to_vec()
+                    .iter()
+                    .map(|v| v.abs().powf(2_f64))
+                    .sum()
             )
-            .map(|(_, normalized)| (normalized[0] as f64).powf(2_f64))
+            .map(|normalized: f64| (normalized).powf(2_f64))
             .collect::<Vec<f64>>();
 
         // If previous distances were passed, return the lowest dist when compared against new distances

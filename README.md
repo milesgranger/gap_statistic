@@ -1,7 +1,9 @@
 
 ### Python implementation of the [Gap Statistic](http://www.web.stanford.edu/~hastie/Papers/gap.pdf)
 
-![Build Status](https://travis-ci.org/milesgranger/gap_statistic.svg?branch=master)
+Linux & OSX: [![Build Status](https://travis-ci.org/milesgranger/gap_statistic.svg?branch=master)](https://travis-ci.org/milesgranger/gap_statistic)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows: [![Build status](https://ci.appveyor.com/api/projects/status/fbnv8del2qkx56j1?svg=true)](https://ci.appveyor.com/project/milesgranger/gap-statistic)  
+
 [![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
 [![Code Health](https://landscape.io/github/milesgranger/gap_statistic/master/landscape.svg?style=flat)](https://landscape.io/github/milesgranger/gap_statistic/master)
 
@@ -19,7 +21,7 @@ using the gap statistic.
 
 ---
 #### Install:  
-Bleeding edge: **Will require Rust the latest rust nightly; and highly unstable!**
+Bleeding edge: **Will require Rust the latest rust nightly**
 ```commandline
 pip install git+git://github.com/milesgranger/gap_statistic.git
 ```
@@ -29,7 +31,7 @@ PyPi:
 pip install --upgrade gap-stat
 ```
 
-Anaconda
+Anaconda (Only available for 1.0.1 release (no rust backend))
 ```commandline
 conda install -c milesgranger gap-stat
 ```
@@ -52,6 +54,7 @@ Change Log:
         - pandas
         - joblib (optional)
     - Install: `pip install gap-stat==1.0.1`
+    - OR conda install -c milesgranger gap-stat==1.0.1
   
 - 1.5.0a(1,2)
     - 27-May-2018
@@ -64,4 +67,15 @@ Change Log:
         - scipy
         - pandas
         - joblib (optional)
-    - Install: `pip install gap-stat==1.5.0a2`
+    - Install: `pip install gap-stat==1.5.0a2` (Not available on Windows)
+    
+- 1.5.1
+    - June-2018
+    - First stable release with Rust backend. OptimalK now takes `backend="rust"`
+    - More tests, add best init in rust kmeans impl for better stability between runs
+    - Dependencies:
+        - numpy
+        - scipy
+        - pandas
+        - joblib (optional)
+    - Install `pip install gap-stat==1.5.1`
