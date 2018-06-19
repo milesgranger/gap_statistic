@@ -4,6 +4,7 @@
 Linux & OSX: [![Build Status](https://travis-ci.org/milesgranger/gap_statistic.svg?branch=master)](https://travis-ci.org/milesgranger/gap_statistic)  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows: [![Build status](https://ci.appveyor.com/api/projects/status/fbnv8del2qkx56j1?svg=true)](https://ci.appveyor.com/project/milesgranger/gap-statistic)  
 
+[![Downloads](http://pepy.tech/badge/gap-stat)](http://pepy.tech/project/gap-stat)
 [![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
 [![Code Health](https://landscape.io/github/milesgranger/gap_statistic/master/landscape.svg?style=flat)](https://landscape.io/github/milesgranger/gap_statistic/master)
 
