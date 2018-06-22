@@ -1,28 +1,36 @@
+{% set data = load_setup_py_data() %}
 
 package:
-  name: gap_statistic
-  version: 1.5.0a
+  name: gap-stat
+  version: {{ data['version'] }}
 
 source:
-  fn: gap-stat-1.5.0a2.tar.gz
-  url: https://files.pythonhosted.org/packages/40/1a/2f8ee08ab6e95bebc95c1363a25ae50ed9b485cbaa16c86a6bc36128d721/gap-stat-1.5.0a2.tar.gz
-  sha256: 2a288145de3ebadc81b38ca5e070c69fd5e82c1603d071d3aa0bcf1cd5976726
+  path: ../
 
 build:
   number: 1
+  script:
+    - pip install gap-stat --no-index --no-deps -f wheelhouse
+
 
 requirements:
   build:
-    - python
+    - python {{ python }}
     - setuptools
-    - rust
+    - pip
   run:
-    - python
+    - python {{ python }}
+    - scipy
+    - numpy
+    - pandas
 
 test:
   imports:
     - gap_statistic
+    - gap_statistic.rust.gapstat
+
 
 about:
-  home: http://github.com/
+  home: http://github.com/milesgranger/gap_statistic
   license: Apache Software License
+  summary: Gap Statistic implementation in Python with backend computation written in Rust
