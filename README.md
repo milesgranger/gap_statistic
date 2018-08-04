@@ -22,7 +22,7 @@ using the gap statistic.
 
 ---
 #### Install:  
-Bleeding edge: **Will require Rust the latest rust nightly**
+Bleeding edge: **Will require Rust set on the latest nightly toolchain**
 ```commandline
 pip install git+git://github.com/milesgranger/gap_statistic.git
 ```
@@ -44,19 +44,24 @@ pip uninstall gap-stat
 ```
 
 
-Change Log:
+Change Log (Latest first):
 
-- 1.0.1
-    - Sept 2017 
-    - Initial release; pure python featuring parallel backends 'joblib' and 'multiprocessing'
-    - Dependencies: 
+- 1.5.2
+    - August-2018
+    - Fix calculation of gap statistic
+    - Install: `pip install gap-stat==1.5.2`
+
+- 1.5.1
+    - June-2018
+    - First stable release with Rust backend. OptimalK now takes `backend="rust"`
+    - More tests, add best init in rust kmeans impl for better stability between runs
+    - Dependencies:
         - numpy
         - scipy
         - pandas
         - joblib (optional)
-    - Install: `pip install gap-stat==1.0.1`
-    - OR conda install -c milesgranger gap-stat==1.0.1
-  
+    - Install `pip install gap-stat==1.5.1`
+    
 - 1.5.0a(1,2)
     - 27-May-2018
     - First alpha of using Rust. `optimalK` now takes `"rust"` as an argument for the parallel_backend
@@ -69,14 +74,20 @@ Change Log:
         - pandas
         - joblib (optional)
     - Install: `pip install gap-stat==1.5.0a2` (Not available on Windows)
-    
-- 1.5.1
-    - June-2018
-    - First stable release with Rust backend. OptimalK now takes `backend="rust"`
-    - More tests, add best init in rust kmeans impl for better stability between runs
-    - Dependencies:
+
+- 1.0.1
+    - Sept 2017 
+    - Initial release; pure python featuring parallel backends 'joblib' and 'multiprocessing'
+    - Dependencies: 
         - numpy
         - scipy
         - pandas
         - joblib (optional)
-    - Install `pip install gap-stat==1.5.1`
+    - Install: `pip install gap-stat==1.0.1`
+    - OR conda install -c milesgranger gap-stat==1.0.1
+  
+
+    
+
+    
+
