@@ -77,7 +77,7 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32, iter: u32) -> f64 {
 
 
     // Calculate and return gap value
-    let gap_value = (ref_dispersions.into_iter().mean() + 1f64).log2() - (dispersion + 1f64).log2();
+    let gap_value = ref_dispersions.into_iter().map(|v| (v  + 1f64).log2()).mean() - (dispersion + 1f64).log2();
     gap_value
 }
 

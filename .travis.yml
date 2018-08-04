@@ -12,14 +12,12 @@ matrix:
     env: PYTHON_VERSION=3.6
 
   - os: linux
-    sudo: required
     language: python
     services:
       - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 
   - os: linux
-    sudo: required
     lanaguage: python
     services:
       - docker

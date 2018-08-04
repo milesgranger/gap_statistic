@@ -122,7 +122,7 @@ class OptimalK:
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic
-        gap_value = np.log(np.mean(ref_dispersions)) - np.log(dispersion)
+        gap_value = np.mean(np.log(ref_dispersions)) - np.log(dispersion)
 
         return gap_value, int(n_clusters)
 
