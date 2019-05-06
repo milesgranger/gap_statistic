@@ -19,6 +19,7 @@ using the gap statistic.
 
 ### Full example available in a notebook [HERE](Example.ipynb)
 
+
 ---
 #### Install:  
 Bleeding edge: **Will require Rust set on the latest nightly toolchain**
