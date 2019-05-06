@@ -38,14 +38,17 @@ jobs:
           set PATH=%PATH%;%USERPROFILE%\.cargo\bin
           echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
         displayName: Install rust (windows)
+
       - script: cargo test --verbose
         displayName: 'Cargo Test'
 
       - script: |
           cargo clean
+          pip install -r requirements.txt
           pip install setuptools-rust setuptools pytest wheel
           python setup.py test
         displayName: "Python Test"
+
       - script: |
           cargo clean
           pip install twine
@@ -53,9 +56,14 @@ jobs:
           python -m pip -v wheel . -w .\\dist
           dir dist
         displayName: "Build wheels"
+
       - task: DownloadSecureFile@1
         inputs:
           secureFile: .pypirc
+
+      - task: TwineAuthenticate@0
+        inputs:
+          artifactFeeds: 'https://pypi.org/'
 
       - script: 'twine upload --config-file $(Agent.TempDirectory)\.pypirc --skip-existing .\\dist\*'
         displayName: "Publish to PyPI"
@@ -85,22 +93,27 @@ jobs:
           curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $(RUSTUP_TOOLCHAIN)
           export PATH=$PATH:$HOME/.cargo/bin
         displayName: 'Install rustc'
+
       - script: |
           export PATH=$PATH:$HOME/.cargo/bin
           cargo test --verbose
         displayName: 'Cargo Test'
+
       - script: |
           export PATH=$PATH:$HOME/.cargo/bin
           cargo clean
+          pip install -r requirements.txt
           pip install setuptools-rust setuptools pytest wheel==0.31.1
           python setup.py test
         displayName: "Python Test"
+        
       - script: |
           export PATH=$PATH:$HOME/.cargo/bin
           pip install twine
           cargo clean
           docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 bash /io/build-wheels.sh
         displayName: "Build wheels"
+
       - task: DownloadSecureFile@1
         inputs:
           secureFile: .pypirc
