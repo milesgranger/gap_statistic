@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
-from typing import Union, Iterable, Tuple
+from typing import Union, Iterable, Tuple, Callable
 from scipy.cluster.vq import kmeans2
 
 try:
@@ -31,16 +31,21 @@ class OptimalK:
     """
     gap_df = None
 
-    def __init__(self, n_jobs: int=-1, parallel_backend: str='joblib') -> None:
+    def __init__(self, n_jobs: int=-1, parallel_backend: str='joblib', clusterer: Callable=None, clusterer_kwargs: dict=None) -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
-        if parallel_backend == 'rust' (fastest) default is to use all cores.
+        if parallel_backend == 'rust' it will use all cores.
 
-        :param n_jobs - int: Number of CPU cores to use. Use all cores if n_jobs == -1 ignored if backend is 'rust'
+        :param n_jobs:
+        :param parallel_backend:
+        :param clusterer:
+        :param clusterer_kwargs:
         """
         self.parallel_backend = parallel_backend if parallel_backend in ['joblib', 'multiprocessing', 'rust'] else None
         self.n_jobs = n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()  # type: int
         self.n_jobs = 1 if parallel_backend is None else self.n_jobs
+        self.clusterer = clusterer if clusterer is not None else kmeans2
+        self.clusterer_kwargs = clusterer_kwargs or dict() if clusterer is not None else dict(iter=10, minit='points')
 
     def __call__(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int=3, cluster_array: Iterable[int]=()):
         """
@@ -110,15 +115,12 @@ class OptimalK:
             random_data = np.random.random_sample(size=X.shape)  # type: np.ndarray
 
             # Fit to it, getting the centroids and labels, and add to accumulated reference dispersions array.
-            centroids, labels = kmeans2(data=random_data,
-                                        k=n_clusters,
-                                        iter=10,
-                                        minit='points')  # type: Tuple[np.ndarray, np.ndarray]
+            centroids, labels = self.clusterer(random_data, n_clusters, **self.clusterer_kwargs)  # type: Tuple[np.ndarray, np.ndarray]
             dispersion = self._calculate_dispersion(X=random_data, labels=labels, centroids=centroids)  # type: float
             ref_dispersions[i] = dispersion
 
         # Fit cluster to original data and create dispersion calc.
-        centroids, labels = kmeans2(data=X, k=n_clusters, iter=10, minit='points')
+        centroids, labels = self.clusterer(random_data, n_clusters, **self.clusterer_kwargs)  # type: Tuple[np.ndarray, np.ndarray]
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic

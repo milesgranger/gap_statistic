@@ -1,6 +1,38 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+import numpy as np
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn.cluster import SpectralClustering, KMeans, MeanShift
+
+from gap_statistic import OptimalK
+
+
+@pytest.mark.parametrize("ClusterModel", [KMeans, MeanShift])
+def test_alternative_clusting_method(ClusterModel):
+    """
+    Test that users can supply alternative clustering method as dep injection
+    """
+
+    def clusterer(X: np.ndarray, k: int, another_test_arg):
+        """
+        Function to wrap a sklearn model as a clusterer for OptimalK
+        First two arguments are always the data matrix, and k, and can supply
+        """
+        m = ClusterModel()
+        m.fit(X)
+        assert another_test_arg == 'test'
+        return m.cluster_centers_, m.predict(X)
+
+    optimalk = OptimalK(n_jobs=-1,
+                        parallel_backend='joblib',
+                        clusterer=clusterer,
+                        clusterer_kwargs={'another_test_arg': 'test'}
+                        )
+    X, y = make_blobs(n_samples=50, n_features=2, centers=3)
+    n_clusters = optimalk(X, n_refs=3, cluster_array=np.arange(1, 5))
+    assert isinstance(n_clusters, int)
+
 
 @pytest.mark.parametrize(
     "parallel_backend, n_jobs, n_clusters", [
@@ -13,9 +45,6 @@ def test_optimalk(parallel_backend, n_jobs, n_clusters):
     """
     Test core functionality of OptimalK using all backends.
     """
-    import numpy as np
-    from sklearn.datasets.samples_generator import make_blobs
-    from gap_statistic import OptimalK
 
     # Create optimalK instance
     optimalK = OptimalK(parallel_backend=parallel_backend, n_jobs=n_jobs)

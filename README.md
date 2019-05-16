@@ -45,6 +45,11 @@ pip uninstall gap-stat
 
 Change Log (Latest first):
 
+- 1.6
+    - May-2019
+    - Support user defined functions for the clustering algorithm used in the gap statistic process
+    - Migrate to Azure Pipelines CI
+
 - 1.5.2
     - August-2018
     - Fix calculation of gap statistic
