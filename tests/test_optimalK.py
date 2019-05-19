@@ -21,25 +21,31 @@ def test_alternative_clusting_method(ClusterModel):
         """
         m = ClusterModel()
         m.fit(X)
-        assert another_test_arg == 'test'
+        assert another_test_arg == "test"
         return m.cluster_centers_, m.predict(X)
 
-    optimalk = OptimalK(n_jobs=-1,
-                        parallel_backend='joblib',
-                        clusterer=clusterer,
-                        clusterer_kwargs={'another_test_arg': 'test'}
-                        )
+    optimalk = OptimalK(
+        n_jobs=-1,
+        parallel_backend="joblib",
+        clusterer=clusterer,
+        clusterer_kwargs={"another_test_arg": "test"},
+    )
     X, y = make_blobs(n_samples=50, n_features=2, centers=3)
     n_clusters = optimalk(X, n_refs=3, cluster_array=np.arange(1, 5))
     assert isinstance(n_clusters, int)
 
 
 @pytest.mark.parametrize(
-    "parallel_backend, n_jobs, n_clusters", [
-        pytest.param('joblib', 1, 3, id="parallel_backend='joblib', n_jobs=1, n_clusters=3"),
+    "parallel_backend, n_jobs, n_clusters",
+    [
+        pytest.param(
+            "joblib", 1, 3, id="parallel_backend='joblib', n_jobs=1, n_clusters=3"
+        ),
         pytest.param(None, 1, 3, id="parallel_backend=None, n_jobs=1, n_clusters=3"),
-        pytest.param('rust', 1, 3, id="parallel_backend='rust', n_jobs=1, n_clusters=3")
-    ]
+        pytest.param(
+            "rust", 1, 3, id="parallel_backend='rust', n_jobs=1, n_clusters=3"
+        ),
+    ],
 )
 def test_optimalk(parallel_backend, n_jobs, n_clusters):
     """
@@ -54,8 +60,11 @@ def test_optimalk(parallel_backend, n_jobs, n_clusters):
 
     suggested_clusters = optimalK(X, n_refs=3, cluster_array=np.arange(1, 10))
 
-    assert np.allclose(suggested_clusters, n_clusters, 2), ('Correct clusters is {}, OptimalK suggested {}'
-                                                            .format(n_clusters, suggested_clusters))
+    assert np.allclose(
+        suggested_clusters, n_clusters, 2
+    ), "Correct clusters is {}, OptimalK suggested {}".format(
+        n_clusters, suggested_clusters
+    )
 
 
 def test_optimalk_cluster_array_vs_data_sizes_error():
@@ -74,7 +83,7 @@ def test_optimalk_cluster_array_vs_data_sizes_error():
 
     with pytest.raises(ValueError) as excinfo:
         optimalK(X, cluster_array=np.arange(1, 10))
-    assert 'The number of suggested clusters to try' in str(excinfo.value)
+    assert "The number of suggested clusters to try" in str(excinfo.value)
 
 
 def test_optimalk_cluster_array_values_error():
@@ -92,7 +101,7 @@ def test_optimalk_cluster_array_values_error():
 
     with pytest.raises(ValueError) as excinfo:
         optimalK(X, cluster_array=[0, -1, 1, 2, 3])
-    assert 'cluster_array contains values less than 1' in str(excinfo.value)
+    assert "cluster_array contains values less than 1" in str(excinfo.value)
 
 
 def test_optimalk_cluster_array_empty_error():
@@ -110,7 +119,7 @@ def test_optimalk_cluster_array_empty_error():
 
     with pytest.raises(ValueError) as excinfo:
         optimalK(X, cluster_array=[])
-    assert 'The supplied cluster_array has no values.' in str(excinfo.value)
+    assert "The supplied cluster_array has no values." in str(excinfo.value)
 
 
 def test_dunders():
@@ -118,10 +127,12 @@ def test_dunders():
     Test that implemented dunder methods don't return errors
     """
     from gap_statistic import OptimalK
+
     optimalK = OptimalK()
     optimalK.__str__()
     optimalK.__repr__()
     optimalK._repr_html_()
+
 
 def test_std():
     # TODO:
