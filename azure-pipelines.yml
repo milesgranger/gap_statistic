@@ -43,17 +43,14 @@ jobs:
         displayName: 'Cargo Test'
 
       - script: |
-          cargo clean
           pip install -r requirements.txt
           pip install setuptools-rust setuptools pytest wheel
           python setup.py test
         displayName: "Python Test"
 
       - script: |
-          cargo clean
           pip install twine
-          python setup.py build_ext
-          python -m pip -v wheel . -w .\\dist
+          python setup.py sdist bdist_wheel
           dir dist
         displayName: "Build wheels"
 
@@ -65,7 +62,7 @@ jobs:
         inputs:
           artifactFeeds: 'https://pypi.org/'
 
-      - script: 'twine upload --config-file $(Agent.TempDirectory)\.pypirc --skip-existing .\\dist\*'
+      - script: 'twine upload --config-file $(Agent.TempDirectory)\.pypirc --skip-existing dist\*'
         displayName: "Publish to PyPI"
         condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/'))
 
