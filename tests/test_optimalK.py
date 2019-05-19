@@ -3,9 +3,17 @@ import pytest
 
 import numpy as np
 from sklearn.datasets.samples_generator import make_blobs
-from sklearn.cluster import SpectralClustering, KMeans, MeanShift
+from sklearn.cluster import KMeans, MeanShift
 
 from gap_statistic import OptimalK
+
+
+def test_bad_init_config():
+    """
+    Cannot define own clustering function and try to use Rust backend
+    """
+    with pytest.raises(ValueError):
+        OptimalK(parallel_backend="rust", clusterer=lambda x, k: print("just testing"))
 
 
 @pytest.mark.parametrize("ClusterModel", [KMeans, MeanShift])
