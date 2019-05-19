@@ -6,6 +6,7 @@
 [![Downloads](http://pepy.tech/badge/gap-stat)](http://pepy.tech/project/gap-stat)
 [![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
 [![Code Health](https://landscape.io/github/milesgranger/gap_statistic/master/landscape.svg?style=flat)](https://landscape.io/github/milesgranger/gap_statistic/master)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
 
 [![Anaconda](https://anaconda.org/milesgranger/gap-stat/badges/version.svg)](https://anaconda.org/milesgranger/gap-stat)

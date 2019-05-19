@@ -12,7 +12,9 @@ try:
     from joblib import Parallel, delayed
 except ImportError:
     Parallel, delayed = None, None
-    warnings.warn('joblib not installed, will be unavailable as a backend for parallel processing.')
+    warnings.warn(
+        "joblib not installed, will be unavailable as a backend for parallel processing."
+    )
 
 
 class OptimalK:
@@ -29,9 +31,16 @@ class OptimalK:
     >>> optimalK(X, cluster_array=[1,2,3,4,5])
     3
     """
+
     gap_df = None
 
-    def __init__(self, n_jobs: int=-1, parallel_backend: str='joblib', clusterer: Callable=None, clusterer_kwargs: dict=None) -> None:
+    def __init__(
+        self,
+        n_jobs: int = -1,
+        parallel_backend: str = "joblib",
+        clusterer: Callable = None,
+        clusterer_kwargs: dict = None,
+    ) -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
         if parallel_backend == 'rust' it will use all cores.
@@ -41,13 +50,26 @@ class OptimalK:
         :param clusterer:
         :param clusterer_kwargs:
         """
-        self.parallel_backend = parallel_backend if parallel_backend in ['joblib', 'multiprocessing', 'rust'] else None
+        self.parallel_backend = (
+            parallel_backend
+            if parallel_backend in ["joblib", "multiprocessing", "rust"]
+            else None
+        )
         self.n_jobs = n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()  # type: int
         self.n_jobs = 1 if parallel_backend is None else self.n_jobs
         self.clusterer = clusterer if clusterer is not None else kmeans2
-        self.clusterer_kwargs = clusterer_kwargs or dict() if clusterer is not None else dict(iter=10, minit='points')
+        self.clusterer_kwargs = (
+            clusterer_kwargs or dict()
+            if clusterer is not None
+            else dict(iter=10, minit="points")
+        )
 
-    def __call__(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int=3, cluster_array: Iterable[int]=()):
+    def __call__(
+        self,
+        X: Union[pd.DataFrame, np.ndarray],
+        n_refs: int = 3,
+        cluster_array: Iterable[int] = (),
+    ):
         """
         Calculates KMeans optimal K using Gap Statistic from Tibshirani, Walther, Hastie
         http://www.web.stanford.edu/~hastie/Papers/gap.pdf
@@ -60,25 +82,29 @@ class OptimalK:
         # Raise error if values are less than 1 or larger than the unique sample in the set.
         cluster_array = np.array([x for x in cluster_array]).astype(int)
         if np.where(cluster_array < 1)[0].shape[0]:
-            raise ValueError('cluster_array contains values less than 1: {}'
-                             .format(cluster_array[np.where(cluster_array < 1)[0]])
-                             )
+            raise ValueError(
+                "cluster_array contains values less than 1: {}".format(
+                    cluster_array[np.where(cluster_array < 1)[0]]
+                )
+            )
         if cluster_array.shape[0] > X.shape[0]:
-            raise ValueError('The number of suggested clusters to try ({}) is larger than samples in dataset. ({})'
-                             .format(cluster_array.shape[0], X.shape[0])
-                             )
+            raise ValueError(
+                "The number of suggested clusters to try ({}) is larger than samples in dataset. ({})".format(
+                    cluster_array.shape[0], X.shape[0]
+                )
+            )
         if not cluster_array.shape[0]:
-            raise ValueError('The supplied cluster_array has no values.')
+            raise ValueError("The supplied cluster_array has no values.")
 
         # Array of resulting gaps.
-        gap_df = pd.DataFrame({'n_clusters': [], 'gap_value': []})
+        gap_df = pd.DataFrame({"n_clusters": [], "gap_value": []})
 
         # Define the compute engine; all methods take identical args and are generators.
-        if self.parallel_backend == 'joblib':
+        if self.parallel_backend == "joblib":
             engine = self._process_with_joblib
-        elif self.parallel_backend == 'multiprocessing':
+        elif self.parallel_backend == "multiprocessing":
             engine = self._process_with_multiprocessing
-        elif self.parallel_backend == 'rust':
+        elif self.parallel_backend == "rust":
             engine = self._process_with_rust
         else:
             engine = self._process_non_parallel
@@ -87,20 +113,32 @@ class OptimalK:
         for (gap_value, n_clusters) in engine(X, n_refs, cluster_array):
 
             # Assign this loop's gap statistic to gaps
-            gap_df = gap_df.append({'n_clusters': n_clusters, 'gap_value': gap_value}, ignore_index=True)
+            gap_df = gap_df.append(
+                {"n_clusters": n_clusters, "gap_value": gap_value}, ignore_index=True
+            )
 
-        self.gap_df = gap_df.sort_values(by='n_clusters', ascending=True).reset_index(drop=True)
+        self.gap_df = gap_df.sort_values(by="n_clusters", ascending=True).reset_index(
+            drop=True
+        )
         return int(self.gap_df.loc[np.argmax(self.gap_df.gap_value.values)].n_clusters)
 
     @staticmethod
-    def _calculate_dispersion(X: Union[pd.DataFrame, np.ndarray], labels: np.ndarray, centroids: np.ndarray) -> float:
+    def _calculate_dispersion(
+        X: Union[pd.DataFrame, np.ndarray], labels: np.ndarray, centroids: np.ndarray
+    ) -> float:
         """
         Calculate the dispersion between actual points and their assigned centroids
         """
-        disp = np.sum(np.sum([np.abs(inst - centroids[label]) ** 2 for inst, label in zip(X, labels)]))  # type: float
+        disp = np.sum(
+            np.sum(
+                [np.abs(inst - centroids[label]) ** 2 for inst, label in zip(X, labels)]
+            )
+        )  # type: float
         return disp
 
-    def _calculate_gap(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, n_clusters: int) -> Tuple[float, int]:
+    def _calculate_gap(
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, n_clusters: int
+    ) -> Tuple[float, int]:
         """
         Calculate the gap value of the given data, n_refs, and number of clusters.
         Return the resutling gap value and n_clusters
@@ -115,12 +153,18 @@ class OptimalK:
             random_data = np.random.random_sample(size=X.shape)  # type: np.ndarray
 
             # Fit to it, getting the centroids and labels, and add to accumulated reference dispersions array.
-            centroids, labels = self.clusterer(random_data, n_clusters, **self.clusterer_kwargs)  # type: Tuple[np.ndarray, np.ndarray]
-            dispersion = self._calculate_dispersion(X=random_data, labels=labels, centroids=centroids)  # type: float
+            centroids, labels = self.clusterer(
+                random_data, n_clusters, **self.clusterer_kwargs
+            )  # type: Tuple[np.ndarray, np.ndarray]
+            dispersion = self._calculate_dispersion(
+                X=random_data, labels=labels, centroids=centroids
+            )  # type: float
             ref_dispersions[i] = dispersion
 
         # Fit cluster to original data and create dispersion calc.
-        centroids, labels = self.clusterer(random_data, n_clusters, **self.clusterer_kwargs)  # type: Tuple[np.ndarray, np.ndarray]
+        centroids, labels = self.clusterer(
+            random_data, n_clusters, **self.clusterer_kwargs
+        )  # type: Tuple[np.ndarray, np.ndarray]
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic
@@ -128,53 +172,70 @@ class OptimalK:
 
         return gap_value, int(n_clusters)
 
-    def _process_with_rust(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
+    def _process_with_rust(
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
+    ):
         """
         Process gap stat using pure rust
         """
         from gap_statistic.rust import gapstat
+
         for label, gap_value in gapstat.optimal_k(X, list(cluster_array)):
             yield (gap_value, label)
 
-    def _process_with_joblib(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
+    def _process_with_joblib(
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
+    ):
         """
         Process calling of .calculate_gap() method using the joblib backend
         """
         if Parallel is None:
-            raise EnvironmentError('joblib is not installed; cannot use joblib as the parallel backend!')
+            raise EnvironmentError(
+                "joblib is not installed; cannot use joblib as the parallel backend!"
+            )
 
         with Parallel(n_jobs=self.n_jobs) as parallel:
-            for gap_value, n_clusters in parallel(delayed(self._calculate_gap)(X, n_refs, n_clusters)
-                                                  for n_clusters in cluster_array):
+            for gap_value, n_clusters in parallel(
+                delayed(self._calculate_gap)(X, n_refs, n_clusters)
+                for n_clusters in cluster_array
+            ):
                 yield (gap_value, n_clusters)
 
-    def _process_with_multiprocessing(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
+    def _process_with_multiprocessing(
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
+    ):
         """
         Process calling of .calculate_gap() method using the multiprocessing library
         """
         with ProcessPoolExecutor(max_workers=self.n_jobs) as executor:
 
-            jobs = [executor.submit(self._calculate_gap, X, n_refs, n_clusters)
-                    for n_clusters in cluster_array
-                    ]
+            jobs = [
+                executor.submit(self._calculate_gap, X, n_refs, n_clusters)
+                for n_clusters in cluster_array
+            ]
 
             for future in as_completed(jobs):
                 gap_value, k = future.result()
                 yield (gap_value, k)
 
-    def _process_non_parallel(self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray):
+    def _process_non_parallel(
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
+    ):
         """
         Process calling of .calculate_gap() method using no parallel backend; simple for loop generator
         """
-        for gap_value, n_clusters in [self._calculate_gap(X, n_refs, n_clusters)
-                                      for n_clusters in cluster_array]:
+        for gap_value, n_clusters in [
+            self._calculate_gap(X, n_refs, n_clusters) for n_clusters in cluster_array
+        ]:
             yield (gap_value, n_clusters)
 
     def __str__(self):
-        return 'OptimalK(n_jobs={}, parallel_backend="{}")'.format(self.n_jobs, self.parallel_backend)
+        return 'OptimalK(n_jobs={}, parallel_backend="{}")'.format(
+            self.n_jobs, self.parallel_backend
+        )
 
     def __repr__(self):
         return self.__str__()
 
     def _repr_html_(self):
-        return '<p>{}</p>'.format(self.__str__())
+        return "<p>{}</p>".format(self.__str__())
