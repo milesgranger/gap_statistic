@@ -50,6 +50,11 @@ class OptimalK:
         :param clusterer:
         :param clusterer_kwargs:
         """
+        if clusterer is not None and parallel_backend == "rust":
+            raise ValueError(
+                "Cannot use 'rust' backend with a user defined clustering function, only KMeans"
+                " is supported on the rust implementation"
+            )
         self.parallel_backend = (
             parallel_backend
             if parallel_backend in ["joblib", "multiprocessing", "rust"]
