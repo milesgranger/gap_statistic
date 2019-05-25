@@ -140,8 +140,3 @@ def test_dunders():
     optimalK.__str__()
     optimalK.__repr__()
     optimalK._repr_html_()
-
-
-def test_std():
-    # TODO:
-    pass

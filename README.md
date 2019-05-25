@@ -46,6 +46,11 @@ pip uninstall gap-stat
 
 Change Log (Latest first):
 
+- 1.6.1
+    - May-2019
+    - Return the reference distributions' standard deviation in the dataframe results
+    - Intall `pip install gap-stat==1.6.1`
+
 - 1.6
     - May-2019
     - Support user defined functions for the clustering algorithm used in the gap statistic process

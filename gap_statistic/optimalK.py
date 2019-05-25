@@ -4,8 +4,9 @@ import warnings
 import numpy as np
 import pandas as pd
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from collections import namedtuple
 from multiprocessing import cpu_count
-from typing import Union, Iterable, Tuple, Callable
+from typing import Union, Iterable, Tuple, Callable, Generator
 from scipy.cluster.vq import kmeans2
 
 try:
@@ -15,6 +16,9 @@ except ImportError:
     warnings.warn(
         "joblib not installed, will be unavailable as a backend for parallel processing."
     )
+
+
+GapCalcResult = namedtuple("GapCalcResult", "gap_value n_clusters ref_dispersion_std")
 
 
 class OptimalK:
@@ -115,11 +119,16 @@ class OptimalK:
             engine = self._process_non_parallel
 
         # Calculate the gaps for each cluster count.
-        for (gap_value, n_clusters) in engine(X, n_refs, cluster_array):
+        for gap_calc_result in engine(X, n_refs, cluster_array):
 
             # Assign this loop's gap statistic to gaps
             gap_df = gap_df.append(
-                {"n_clusters": n_clusters, "gap_value": gap_value}, ignore_index=True
+                {
+                    "n_clusters": gap_calc_result.n_clusters,
+                    "gap_value": gap_calc_result.gap_value,
+                    "ref_dispersion_std": gap_calc_result.ref_dispersion_std,
+                },
+                ignore_index=True,
             )
 
         self.gap_df = gap_df.sort_values(by="n_clusters", ascending=True).reset_index(
@@ -138,24 +147,24 @@ class OptimalK:
             np.sum(
                 [np.abs(inst - centroids[label]) ** 2 for inst, label in zip(X, labels)]
             )
-        )  # type: float
+        )
         return disp
 
     def _calculate_gap(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, n_clusters: int
-    ) -> Tuple[float, int]:
+    ) -> GapCalcResult:
         """
         Calculate the gap value of the given data, n_refs, and number of clusters.
         Return the resutling gap value and n_clusters
         """
         # Holder for reference dispersion results
-        ref_dispersions = np.zeros(n_refs)  # type: np.ndarray
+        ref_dispersions = np.zeros(n_refs)
 
         # For n_references, generate random sample and perform kmeans getting resulting dispersion of each loop
         for i in range(n_refs):
 
             # Create new random reference set
-            random_data = np.random.random_sample(size=X.shape)  # type: np.ndarray
+            random_data = np.random.random_sample(size=X.shape)
 
             # Fit to it, getting the centroids and labels, and add to accumulated reference dispersions array.
             centroids, labels = self.clusterer(
@@ -163,7 +172,7 @@ class OptimalK:
             )  # type: Tuple[np.ndarray, np.ndarray]
             dispersion = self._calculate_dispersion(
                 X=random_data, labels=labels, centroids=centroids
-            )  # type: float
+            )
             ref_dispersions[i] = dispersion
 
         # Fit cluster to original data and create dispersion calc.
@@ -175,22 +184,24 @@ class OptimalK:
         # Calculate gap statistic
         gap_value = np.mean(np.log(ref_dispersions)) - np.log(dispersion)
 
-        return gap_value, int(n_clusters)
+        return GapCalcResult(gap_value, int(n_clusters), ref_dispersions.std())
 
     def _process_with_rust(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
-    ):
+    ) -> Generator[GapCalcResult, None, None]:
         """
         Process gap stat using pure rust
         """
         from gap_statistic.rust import gapstat
 
-        for label, gap_value in gapstat.optimal_k(X, list(cluster_array)):
-            yield (gap_value, label)
+        for n_clusters, gap_value, ref_dispersion_std in gapstat.optimal_k(
+            X, cluster_array
+        ):
+            yield GapCalcResult(gap_value, n_clusters, ref_dispersion_std)
 
     def _process_with_joblib(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
-    ):
+    ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using the joblib backend
         """
@@ -200,15 +211,15 @@ class OptimalK:
             )
 
         with Parallel(n_jobs=self.n_jobs) as parallel:
-            for gap_value, n_clusters in parallel(
+            for gap_calc_result in parallel(
                 delayed(self._calculate_gap)(X, n_refs, n_clusters)
                 for n_clusters in cluster_array
             ):
-                yield (gap_value, n_clusters)
+                yield gap_calc_result
 
     def _process_with_multiprocessing(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
-    ):
+    ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using the multiprocessing library
         """
@@ -218,21 +229,19 @@ class OptimalK:
                 executor.submit(self._calculate_gap, X, n_refs, n_clusters)
                 for n_clusters in cluster_array
             ]
-
             for future in as_completed(jobs):
-                gap_value, k = future.result()
-                yield (gap_value, k)
+                yield future.result()
 
     def _process_non_parallel(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
-    ):
+    ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using no parallel backend; simple for loop generator
         """
-        for gap_value, n_clusters in [
+        for gap_calc_result in [
             self._calculate_gap(X, n_refs, n_clusters) for n_clusters in cluster_array
         ]:
-            yield (gap_value, n_clusters)
+            yield gap_calc_result
 
     def __str__(self):
         return 'OptimalK(n_jobs={}, parallel_backend="{}")'.format(
