@@ -1,21 +1,22 @@
 #![feature(use_extern_macros, specialization)]
 
-
-#[macro_use] pub extern crate pyo3;
-#[macro_use] pub extern crate ndarray;
-pub extern crate ndarray_rand;
+#[macro_use]
+pub extern crate pyo3;
+#[macro_use]
+pub extern crate ndarray;
 pub extern crate ndarray_parallel;
-pub extern crate rayon;
-pub extern crate rand;
-pub extern crate statrs;
+pub extern crate ndarray_rand;
 pub extern crate num_traits;
+pub extern crate rand;
+pub extern crate rayon;
+pub extern crate statrs;
 
 use pyo3::prelude::*;
 
+pub mod gap_statistic;
+pub mod kmeans;
 #[cfg(test)]
 mod tests;
-pub mod kmeans;
-pub mod gap_statistic;
 
 #[pyfunction]
 fn kmeans(data: Vec<Vec<f64>>, k: u32, max_iter: u32, iter: u32) -> PyResult<Vec<u32>> {
@@ -25,14 +26,17 @@ fn kmeans(data: Vec<Vec<f64>>, k: u32, max_iter: u32, iter: u32) -> PyResult<Vec
 }
 
 #[pyfunction]
-fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>, iter: Option<u32>) -> PyResult<Vec<(u32, f64)>> {
+fn optimal_k(
+    data: Vec<Vec<f64>>,
+    cluster_range: Vec<u32>,
+    iter: Option<u32>,
+) -> PyResult<Vec<(u32, f64, f64)>> {
     if let Some(iterations) = iter {
         Ok(gap_statistic::optimal_k(data, cluster_range, iterations))
     } else {
         Ok(gap_statistic::optimal_k(data, cluster_range, 10))
     }
 }
-
 
 #[pymodinit]
 fn gapstat(py: Python, m: &PyModule) -> PyResult<()> {
