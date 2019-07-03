@@ -6,7 +6,7 @@ import pandas as pd
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from collections import namedtuple
 from multiprocessing import cpu_count
-from typing import Union, Iterable, Tuple, Callable, Generator
+from typing import Union, Iterable, Callable, Generator
 from scipy.cluster.vq import kmeans2
 
 try:
@@ -18,7 +18,10 @@ except ImportError:
     )
 
 
-GapCalcResult = namedtuple("GapCalcResult", "gap_value n_clusters ref_dispersion_std")
+GapCalcResult = namedtuple(
+    "GapCalcResult",
+    "gap_value n_clusters ref_dispersion_std sdk sk gap_star sk_star",
+)
 
 
 class OptimalK:
@@ -127,6 +130,10 @@ class OptimalK:
                     "n_clusters": gap_calc_result.n_clusters,
                     "gap_value": gap_calc_result.gap_value,
                     "ref_dispersion_std": gap_calc_result.ref_dispersion_std,
+                    "sdk": gap_calc_result.sdk,
+                    "sk": gap_calc_result.sk,
+                    "gap*": gap_calc_result.gap_star,
+                    "sk*": gap_calc_result.sk_star,
                 },
                 ignore_index=True,
             )
@@ -182,9 +189,23 @@ class OptimalK:
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic
-        gap_value = np.mean(np.log(ref_dispersions)) - np.log(dispersion)
+        ref_log_dispersion = np.mean(np.log(ref_dispersions))
+        log_dispersion = np.log(dispersion)
+        gap_value = ref_log_dispersion - log_dispersion
+        # compute standard deviation
+        sdk = np.sqrt(np.mean((np.log(ref_dispersions) - ref_log_dispersion) ** 2.))
+        sk = np.sqrt(1. + 1. / n_refs) * sdk
 
-        return GapCalcResult(gap_value, int(n_clusters), ref_dispersions.std())
+        # Calculate Gap* statistic
+        # by "A comparison of Gap statistic definitions with and
+        # with-out logarithm function"
+        # https://core.ac.uk/download/pdf/12172514.pdf
+        gap_star = np.mean(ref_dispersions) - dispersion
+        sdk_star = np.sqrt(np.mean((ref_dispersions - dispersion) ** 2.))
+        sk_star = np.sqrt(1. + 1. / n_refs) * sdk_star
+
+        return GapCalcResult(
+            gap_value, int(n_clusters), ref_dispersions.std(), sdk, sk, gap_star, sk_star)
 
     def _process_with_rust(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
@@ -194,10 +215,10 @@ class OptimalK:
         """
         from gap_statistic.rust import gapstat
 
-        for n_clusters, gap_value, ref_dispersion_std in gapstat.optimal_k(
+        for n_clusters, gap_value, ref_dispersion_std, sdk, sk, gap_star, sk_star in gapstat.optimal_k(
             X, cluster_array
         ):
-            yield GapCalcResult(gap_value, n_clusters, ref_dispersion_std)
+            yield GapCalcResult(gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star)
 
     def _process_with_joblib(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
@@ -241,6 +262,7 @@ class OptimalK:
         for gap_calc_result in [
             self._calculate_gap(X, n_refs, n_clusters) for n_clusters in cluster_array
         ]:
+            print("Job's done!")
             yield gap_calc_result
 
     def __str__(self):
