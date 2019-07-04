@@ -101,3 +101,6 @@ ENV/
 
 # vim swap files
 *.swp
+
+# osx thumbnail cache?
+.DS_store
