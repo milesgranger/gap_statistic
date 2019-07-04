@@ -2,6 +2,7 @@ import sys
 from setuptools import setup
 from gap_statistic import __version__
 
+
 try:
     from setuptools_rust import RustExtension, Binding
 except ImportError:
