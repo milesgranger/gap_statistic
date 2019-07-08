@@ -151,8 +151,7 @@ class OptimalK:
 
         # drop auxilariy columns
         gap_df.drop(
-            labels=['sdk', 'sk', 'sk*', 'gap_k+1', 'gap*_k+1', 'sk+1',
-                    'sk*+1'],
+            labels=['sdk', 'sk', 'sk*', 'gap_k+1', 'gap*_k+1', 'sk+1', 'sk*+1'],
             axis=1,
             inplace=True,
             errors='ignore',
@@ -204,12 +203,6 @@ class OptimalK:
 
         # diff plot
         plt.plot(self.gap_df.n_clusters, self.gap_df['diff'], linewidth=3)
-        # plt.scatter(
-        #     self.gap_df[self.gap_df.n_clusters == self.n_clusters].n_clusters,
-        #     self.gap_df[self.gap_df.n_clusters == self.n_clusters]['diff'],
-        #     s=250,
-        #     c='r',
-        # )
         plt.grid(True)
         plt.xlabel('Cluster Count')
         plt.ylabel('Diff Value')
@@ -229,8 +222,6 @@ class OptimalK:
 
         # diff* plot
         plt.plot(self.gap_df.n_clusters, self.gap_df['diff*'], linewidth=3)
-        # plt.scatter(df[df.n_clusters == n_clusters].n_clusters,
-        #         df[df.n_clusters == n_clusters]['diff*'], s=250, c='r')
         plt.grid(True)
         plt.xlabel('Cluster Count')
         plt.ylabel('Diff* Value')
@@ -358,7 +349,6 @@ class OptimalK:
         for gap_calc_result in [
             self._calculate_gap(X, n_refs, n_clusters) for n_clusters in cluster_array
         ]:
-            print("Job's done!")
             yield gap_calc_result
 
     def __str__(self):

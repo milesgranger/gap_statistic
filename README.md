@@ -56,7 +56,7 @@ The methods implemented can cluster a given dataset using a range of provided k 
   - Taking the `k` maximizing the Gap\* value, an alternative measure suggested in ["A comparison of Gap statistic definitions with and
 with-out logarithm function"](https://core.ac.uk/download/pdf/12172514.pdf) by Mohajer, Englmeier and Schmid. The authors claim this measure avoids the over-estimation of the number of clusters from which the original Gap statistics suffers, and can also suggest an optimal value for k for cases in which Gap cannot. They do warn, however, that the original Gap statistic performs better than Gap\* in the case of overlapped clusters, due to its tendency to overestimate the number of clusters.
 
-Note that none of the above methods is guraenteed to find an optimal value for `k`, and that they often contradict one another. Rather, they can provide more information on which to base your choice of `k`, which should take numerous other factors into account.
+Note that none of the above methods is guaranteed to find an optimal value for `k`, and that they often contradict one another. Rather, they can provide more information on which to base your choice of `k`, which should take numerous other factors into account.
 
 ---
 
