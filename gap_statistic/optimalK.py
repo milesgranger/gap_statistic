@@ -26,8 +26,7 @@ except ImportError:
 
 
 GapCalcResult = namedtuple(
-    "GapCalcResult",
-    "gap_value n_clusters ref_dispersion_std sdk sk gap_star sk_star",
+    "GapCalcResult", "gap_value n_clusters ref_dispersion_std sdk sk gap_star sk_star"
 )
 
 
@@ -74,9 +73,7 @@ class OptimalK:
             if parallel_backend in ["joblib", "multiprocessing", "rust"]
             else None
         )
-        self.n_jobs = (
-            n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()
-        )  # type: int
+        self.n_jobs = n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()  # type: int
         self.n_jobs = 1 if parallel_backend is None else self.n_jobs
         self.clusterer = clusterer if clusterer is not None else kmeans2
         self.clusterer_kwargs = (
@@ -150,32 +147,28 @@ class OptimalK:
             gap_df["gap*_k+1"] = gap_df["gap*"].shift(-1)
             gap_df["sk+1"] = gap_df["sk"].shift(-1)
             gap_df["sk*+1"] = gap_df["sk*"].shift(-1)
-            gap_df["diff"] = (
-                gap_df["gap_value"] - gap_df["gap_k+1"] + gap_df["sk+1"]
-            )
-            gap_df["diff*"] = (
-                gap_df["gap*"] - gap_df["gap*_k+1"] + gap_df["sk*+1"]
-            )
+            gap_df["diff"] = gap_df["gap_value"] - gap_df["gap_k+1"] + gap_df["sk+1"]
+            gap_df["diff*"] = gap_df["gap*"] - gap_df["gap*_k+1"] + gap_df["sk*+1"]
 
         # drop auxilariy columns
-        gap_df.drop(
-            labels=[
-                "sdk",
-                "sk",
-                "sk*",
-                "gap_k+1",
-                "gap*_k+1",
-                "sk+1",
-                "sk*+1",
-            ],
-            axis=1,
-            inplace=True,
-            errors="ignore",
-        )
+        # gap_df.drop(
+        #     labels=[
+        #         "sdk",
+        #         "sk",
+        #         "sk*",
+        #         "gap_k+1",
+        #         "gap*_k+1",
+        #         "sk+1",
+        #         "sk*+1",
+        #     ],
+        #     axis=1,
+        #     inplace=True,
+        #     errors="ignore",
+        # )
 
-        self.gap_df = gap_df.sort_values(
-            by="n_clusters", ascending=True
-        ).reset_index(drop=True)
+        self.gap_df = gap_df.sort_values(by="n_clusters", ascending=True).reset_index(
+            drop=True
+        )
         self.n_clusters = int(
             self.gap_df.loc[np.argmax(self.gap_df.gap_value.values)].n_clusters
         )
@@ -228,9 +221,7 @@ class OptimalK:
         plt.show()
 
         # Gap* plot
-        max_ix = self.gap_df[
-            self.gap_df["gap*"] == self.gap_df["gap*"].max()
-        ].index[0]
+        max_ix = self.gap_df[self.gap_df["gap*"] == self.gap_df["gap*"].max()].index[0]
         plt.plot(self.gap_df.n_clusters, self.gap_df["gap*"], linewidth=3)
         plt.scatter(
             self.gap_df.loc[max_ix]["n_clusters"],
@@ -254,19 +245,14 @@ class OptimalK:
 
     @staticmethod
     def _calculate_dispersion(
-        X: Union[pd.DataFrame, np.ndarray],
-        labels: np.ndarray,
-        centroids: np.ndarray,
+        X: Union[pd.DataFrame, np.ndarray], labels: np.ndarray, centroids: np.ndarray
     ) -> float:
         """
         Calculate the dispersion between actual points and their assigned centroids
         """
         disp = np.sum(
             np.sum(
-                [
-                    np.abs(inst - centroids[label]) ** 2
-                    for inst, label in zip(X, labels)
-                ]
+                [np.abs(inst - centroids[label]) ** 2 for inst, label in zip(X, labels)]
             )
         )
         return disp
@@ -300,18 +286,14 @@ class OptimalK:
         centroids, labels = self.clusterer(
             random_data, n_clusters, **self.clusterer_kwargs
         )  # type: Tuple[np.ndarray, np.ndarray]
-        dispersion = self._calculate_dispersion(
-            X=X, labels=labels, centroids=centroids
-        )
+        dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic
         ref_log_dispersion = np.mean(np.log(ref_dispersions))
         log_dispersion = np.log(dispersion)
         gap_value = ref_log_dispersion - log_dispersion
         # compute standard deviation
-        sdk = np.sqrt(
-            np.mean((np.log(ref_dispersions) - ref_log_dispersion) ** 2.0)
-        )
+        sdk = np.sqrt(np.mean((np.log(ref_dispersions) - ref_log_dispersion) ** 2.0))
         sk = np.sqrt(1.0 + 1.0 / n_refs) * sdk
 
         # Calculate Gap* statistic
@@ -333,10 +315,7 @@ class OptimalK:
         )
 
     def _process_with_rust(
-        self,
-        X: Union[pd.DataFrame, np.ndarray],
-        n_refs: int,
-        cluster_array: np.ndarray,
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process gap stat using pure rust
@@ -353,20 +332,11 @@ class OptimalK:
             sk_star,
         ) in gapstat.optimal_k(X, cluster_array):
             yield GapCalcResult(
-                gap_value,
-                n_clusters,
-                ref_dispersion_std,
-                sdk,
-                sk,
-                gap_star,
-                sk_star,
+                gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
             )
 
     def _process_with_joblib(
-        self,
-        X: Union[pd.DataFrame, np.ndarray],
-        n_refs: int,
-        cluster_array: np.ndarray,
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using the joblib backend
@@ -384,10 +354,7 @@ class OptimalK:
                 yield gap_calc_result
 
     def _process_with_multiprocessing(
-        self,
-        X: Union[pd.DataFrame, np.ndarray],
-        n_refs: int,
-        cluster_array: np.ndarray,
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using the multiprocessing library
@@ -402,17 +369,13 @@ class OptimalK:
                 yield future.result()
 
     def _process_non_parallel(
-        self,
-        X: Union[pd.DataFrame, np.ndarray],
-        n_refs: int,
-        cluster_array: np.ndarray,
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process calling of .calculate_gap() method using no parallel backend; simple for loop generator
         """
         for gap_calc_result in [
-            self._calculate_gap(X, n_refs, n_clusters)
-            for n_clusters in cluster_array
+            self._calculate_gap(X, n_refs, n_clusters) for n_clusters in cluster_array
         ]:
             yield gap_calc_result
 
