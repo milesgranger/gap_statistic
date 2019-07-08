@@ -63,5 +63,5 @@ fn test_optimalk() {
         .collect::<Vec<Vec<f64>>>();
 
     let result = gap_statistic::optimal_k(data, (1..6).collect(), 10);
-    println!("Got {:?}", result)
+    // println!("Got {:?}", result)
 }
