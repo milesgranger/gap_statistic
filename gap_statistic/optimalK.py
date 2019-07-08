@@ -151,20 +151,12 @@ class OptimalK:
             gap_df["diff*"] = gap_df["gap*"] - gap_df["gap*_k+1"] + gap_df["sk*+1"]
 
         # drop auxilariy columns
-        # gap_df.drop(
-        #     labels=[
-        #         "sdk",
-        #         "sk",
-        #         "sk*",
-        #         "gap_k+1",
-        #         "gap*_k+1",
-        #         "sk+1",
-        #         "sk*+1",
-        #     ],
-        #     axis=1,
-        #     inplace=True,
-        #     errors="ignore",
-        # )
+        gap_df.drop(
+            labels=["sdk", "sk", "sk*", "gap_k+1", "gap*_k+1", "sk+1", "sk*+1"],
+            axis=1,
+            inplace=True,
+            errors="ignore",
+        )
 
         self.gap_df = gap_df.sort_values(by="n_clusters", ascending=True).reset_index(
             drop=True
