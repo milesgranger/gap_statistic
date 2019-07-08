@@ -1,5 +1,4 @@
-use ndarray::{Array1, Array2, Axis};
-use ndarray_parallel::prelude::*;
+use ndarray::{Array1, Array2};
 use ndarray_rand::RandomExt;
 use num_traits::pow::Pow;
 use rand::distributions::Range;
@@ -38,7 +37,7 @@ pub fn convert_2d_vec_to_array(data: Vec<Vec<f64>>) -> Array2<f64> {
     data
 }
 
-pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>, iter: u32) -> Vec<(u32, f64, f64)> {
+pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>, iter: u32) -> Vec<GapCalcResult> {
     /*
         Given 2d data and a cluster range, return a vector of tuples
         where the first element represents n_clusters, gap value, and last is the ref disp std.
@@ -50,18 +49,25 @@ pub fn optimal_k(data: Vec<Vec<f64>>, cluster_range: Vec<u32>, iter: u32) -> Vec
     // Get gap values for each cluster in range.
 
     let gap_values = cluster_range
-        .into_par_iter()
-        .map(|n_clusters| {
-            let (gap_values, ref_disp_std) = calculate_gap(&data, n_clusters.clone(), iter.clone());
-            (*n_clusters, gap_values, ref_disp_std)
-        })
-        .collect::<Vec<(u32, f64, f64)>>();
+        .into_iter()
+        .map(|n_clusters| calculate_gap(&data, n_clusters.clone(), iter))
+        .collect::<Vec<GapCalcResult>>();
 
     gap_values
 }
 
+pub struct GapCalcResult {
+    pub(crate) gap_value: f64,
+    pub(crate) n_clusters: u32,
+    pub(crate) ref_dispersion_std: f64,
+    pub(crate) sdk: f64,
+    pub(crate) sk: f64,
+    pub(crate) gap_star: f64,
+    pub(crate) sk_star: f64,
+}
+
 // Calculate the gap value
-fn calculate_gap(data: &Array2<f64>, n_clusters: u32, iter: u32) -> (f64, f64) {
+fn calculate_gap(data: &Array2<f64>, n_clusters: u32, iter: u32) -> GapCalcResult {
     let n_refs = 5; // TODO: Add this as parameter
     let mut ref_dispersions = Array1::zeros((n_refs,));
 
@@ -77,17 +83,37 @@ fn calculate_gap(data: &Array2<f64>, n_clusters: u32, iter: u32) -> (f64, f64) {
 
     // Do calculations for the actual data
     let (centroids, labels) = kmeans(&data, n_clusters, 5, iter);
-    let dispersion = calculate_dispersion(&data, labels, centroids);
 
     let ref_dispersions = ref_dispersions.to_vec();
 
-    // Calculate gap
-    let gap_value =
-        ref_dispersions.iter().map(|v| (v + 1f64).log2()).mean() - (dispersion + 1f64).log2();
+    let dispersion = calculate_dispersion(&data, labels, centroids);
+    let ref_log_dispersion = ref_dispersions.iter().map(|v| v.log2()).mean();
+    let log_dispersion = dispersion.log2();
+    let gap_value = ref_log_dispersion - log_dispersion;
+    let sdk = ref_dispersions
+        .iter()
+        .map(|v| (v.log2() - ref_log_dispersion).powf(2.0))
+        .mean()
+        .sqrt();
+    let sk = (1. + 1. / n_refs as f64).sqrt() * sdk;
+    let gap_star = ref_dispersions.iter().mean() - dispersion;
+    let sdk_star = ref_dispersions
+        .iter()
+        .map(|v| (v - dispersion).powf(2.0))
+        .mean()
+        .sqrt();
+    let sk_star = (1. + 1. / n_refs as f64).sqrt() * sdk_star;
+    let ref_dispersion_std = ref_dispersions.iter().std_dev();
 
-    // Calculate std of ref dispersions
-    let ref_disp_std = ref_dispersions.iter().std_dev();
-    (gap_value, ref_disp_std)
+    GapCalcResult {
+        gap_value,
+        n_clusters,
+        ref_dispersion_std,
+        sdk,
+        sk,
+        gap_star,
+        sk_star,
+    }
 }
 
 // Calculate the dispersion
