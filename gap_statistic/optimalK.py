@@ -6,9 +6,16 @@ import pandas as pd
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from collections import namedtuple
 from multiprocessing import cpu_count
-from typing import Union, Iterable, Tuple, Callable, Generator
+from typing import Union, Iterable, Callable, Generator
 from scipy.cluster.vq import kmeans2
 
+try:
+    import matplotlib.pyplot as plt
+
+    MATPLOTLIB_FOUND = True
+except ImportError:
+    MATPLOTLIB_FOUND = False
+    warnings.warn("matplotlib not installed; results plotting is disabled.")
 try:
     from joblib import Parallel, delayed
 except ImportError:
@@ -18,7 +25,9 @@ except ImportError:
     )
 
 
-GapCalcResult = namedtuple("GapCalcResult", "gap_value n_clusters ref_dispersion_std")
+GapCalcResult = namedtuple(
+    "GapCalcResult", "gap_value n_clusters ref_dispersion_std sdk sk gap_star sk_star"
+)
 
 
 class OptimalK:
@@ -127,14 +136,104 @@ class OptimalK:
                     "n_clusters": gap_calc_result.n_clusters,
                     "gap_value": gap_calc_result.gap_value,
                     "ref_dispersion_std": gap_calc_result.ref_dispersion_std,
+                    "sdk": gap_calc_result.sdk,
+                    "sk": gap_calc_result.sk,
+                    "gap*": gap_calc_result.gap_star,
+                    "sk*": gap_calc_result.sk_star,
                 },
                 ignore_index=True,
             )
+            gap_df["gap_k+1"] = gap_df["gap_value"].shift(-1)
+            gap_df["gap*_k+1"] = gap_df["gap*"].shift(-1)
+            gap_df["sk+1"] = gap_df["sk"].shift(-1)
+            gap_df["sk*+1"] = gap_df["sk*"].shift(-1)
+            gap_df["diff"] = gap_df["gap_value"] - gap_df["gap_k+1"] + gap_df["sk+1"]
+            gap_df["diff*"] = gap_df["gap*"] - gap_df["gap*_k+1"] + gap_df["sk*+1"]
+
+        # drop auxilariy columns
+        gap_df.drop(
+            labels=["sdk", "sk", "sk*", "gap_k+1", "gap*_k+1", "sk+1", "sk*+1"],
+            axis=1,
+            inplace=True,
+            errors="ignore",
+        )
 
         self.gap_df = gap_df.sort_values(by="n_clusters", ascending=True).reset_index(
             drop=True
         )
-        return int(self.gap_df.loc[np.argmax(self.gap_df.gap_value.values)].n_clusters)
+        self.n_clusters = int(
+            self.gap_df.loc[np.argmax(self.gap_df.gap_value.values)].n_clusters
+        )
+        return self.n_clusters
+
+    def plot_results(self):
+        """
+        Plots the results of the last run optimal K search procedure.
+        Four plots are printed:
+        (1) A plot of the Gap value - as defined in the original Tibshirani et
+        al paper - versus n, the number of clusters.
+        (2) A plot of diff versus n, the number of clusters, where diff =
+        Gap(k) - Gap(k+1) + s_{k+1}. The original Tibshirani et al paper
+        recommends choosing the smallest k such that this measure is positive.
+        (3) A plot of the Gap* value - a variant of the Gap statistic suggested
+        in "A comparison of Gap statistic definitions with and with-out
+        logarithm function" [https://core.ac.uk/download/pdf/12172514.pdf],
+        which simply removes the logarithm operation from the Gap calculation -
+        versus n, the number of clusters.
+        (4) A plot of the diff* value versus n, the number of clusters. diff*
+        corresponds to the aforementioned diff value for the case of Gap*.
+        """
+        if not MATPLOTLIB_FOUND:
+            print("matplotlib not installed; results plotting is disabled.")
+            return
+        if not hasattr(self, "gap_df") or self.gap_df is None:
+            print("No results to print. OptimalK not called yet.")
+            return
+
+        # Gap values plot
+        plt.plot(self.gap_df.n_clusters, self.gap_df.gap_value, linewidth=3)
+        plt.scatter(
+            self.gap_df[self.gap_df.n_clusters == self.n_clusters].n_clusters,
+            self.gap_df[self.gap_df.n_clusters == self.n_clusters].gap_value,
+            s=250,
+            c="r",
+        )
+        plt.grid(True)
+        plt.xlabel("Cluster Count")
+        plt.ylabel("Gap Value")
+        plt.title("Gap Values by Cluster Count")
+        plt.show()
+
+        # diff plot
+        plt.plot(self.gap_df.n_clusters, self.gap_df["diff"], linewidth=3)
+        plt.grid(True)
+        plt.xlabel("Cluster Count")
+        plt.ylabel("Diff Value")
+        plt.title("Diff Values by Cluster Count")
+        plt.show()
+
+        # Gap* plot
+        max_ix = self.gap_df[self.gap_df["gap*"] == self.gap_df["gap*"].max()].index[0]
+        plt.plot(self.gap_df.n_clusters, self.gap_df["gap*"], linewidth=3)
+        plt.scatter(
+            self.gap_df.loc[max_ix]["n_clusters"],
+            self.gap_df.loc[max_ix]["gap*"],
+            s=250,
+            c="r",
+        )
+        plt.grid(True)
+        plt.xlabel("Cluster Count")
+        plt.ylabel("Gap* Value")
+        plt.title("Gap* Values by Cluster Count")
+        plt.show()
+
+        # diff* plot
+        plt.plot(self.gap_df.n_clusters, self.gap_df["diff*"], linewidth=3)
+        plt.grid(True)
+        plt.xlabel("Cluster Count")
+        plt.ylabel("Diff* Value")
+        plt.title("Diff* Values by Cluster Count")
+        plt.show()
 
     @staticmethod
     def _calculate_dispersion(
@@ -182,9 +281,30 @@ class OptimalK:
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
         # Calculate gap statistic
-        gap_value = np.mean(np.log(ref_dispersions)) - np.log(dispersion)
+        ref_log_dispersion = np.mean(np.log(ref_dispersions))
+        log_dispersion = np.log(dispersion)
+        gap_value = ref_log_dispersion - log_dispersion
+        # compute standard deviation
+        sdk = np.sqrt(np.mean((np.log(ref_dispersions) - ref_log_dispersion) ** 2.0))
+        sk = np.sqrt(1.0 + 1.0 / n_refs) * sdk
 
-        return GapCalcResult(gap_value, int(n_clusters), ref_dispersions.std())
+        # Calculate Gap* statistic
+        # by "A comparison of Gap statistic definitions with and
+        # with-out logarithm function"
+        # https://core.ac.uk/download/pdf/12172514.pdf
+        gap_star = np.mean(ref_dispersions) - dispersion
+        sdk_star = np.sqrt(np.mean((ref_dispersions - dispersion) ** 2.0))
+        sk_star = np.sqrt(1.0 + 1.0 / n_refs) * sdk_star
+
+        return GapCalcResult(
+            gap_value,
+            int(n_clusters),
+            ref_dispersions.std(),
+            sdk,
+            sk,
+            gap_star,
+            sk_star,
+        )
 
     def _process_with_rust(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
@@ -194,10 +314,18 @@ class OptimalK:
         """
         from gap_statistic.rust import gapstat
 
-        for n_clusters, gap_value, ref_dispersion_std in gapstat.optimal_k(
-            X, cluster_array
-        ):
-            yield GapCalcResult(gap_value, n_clusters, ref_dispersion_std)
+        for (
+            n_clusters,
+            gap_value,
+            ref_dispersion_std,
+            sdk,
+            sk,
+            gap_star,
+            sk_star,
+        ) in gapstat.optimal_k(X, cluster_array):
+            yield GapCalcResult(
+                gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
+            )
 
     def _process_with_joblib(
         self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
