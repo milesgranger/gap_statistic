@@ -276,7 +276,7 @@ class OptimalK:
 
         # Fit cluster to original data and create dispersion calc.
         centroids, labels = self.clusterer(
-            random_data, n_clusters, **self.clusterer_kwargs
+            X, n_clusters, **self.clusterer_kwargs
         )  # type: Tuple[np.ndarray, np.ndarray]
         dispersion = self._calculate_dispersion(X=X, labels=labels, centroids=centroids)
 
