@@ -113,6 +113,13 @@ Additionally, the relation between the above measures and the number of clusters
 ---
 #### Change Log (Latest first):
 
+- 1.7.0
+    - July 2019
+    - Fix passing of null dataset in python gap value calculations [#34](https://github.com/milesgranger/gap_statistic/pull/34)
+    - Use advanced method for choosing k, documentation updates, plotting, other enhancements. [#28](https://github.com/milesgranger/gap_statistic/pull/28)
+    - Add OSX support to CI/CD [#31](https://github.com/milesgranger/gap_statistic/pull/31)
+    - Change license to dual Unlicense / MIT [#30](https://github.com/milesgranger/gap_statistic/pull/30)
+    
 - 1.6.1
     - May-2019
     - Return the reference distributions' standard deviation in the dataframe results
