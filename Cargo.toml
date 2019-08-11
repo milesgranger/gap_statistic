@@ -1,6 +1,6 @@
 [package]
 name = "gap-stat"
-version = "1.5.2"
+version = "1.7.1"
 authors = ["Miles Granger <miles59923@gmail.com>"]
 
 [lib]
@@ -8,12 +8,13 @@ name = "gap_statistic"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "^0.11.1"
-ndarray-rand = "^0.7.0"
-ndarray-parallel = "^0.8.0"
+ndarray = "^0.12"
+ndarray-rand = "0.9.0"
+ndarray-parallel = "^0.9.0"
 num-traits = "^0.2.4"
-pyo3 = { version = "^0.4.0", features = ["extension-module"]}
-rand = "^0.4.2"
+numpy = "0.6"
+pyo3 = { version = "^0.7.0", features = ["extension-module"]}
+rand = "0.6.0"
 rayon = "^1.0.1"
 statrs = "^0.9.0"
 

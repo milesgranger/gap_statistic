@@ -1,9 +1,10 @@
 #![allow(dead_code, unused)]
 
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2, Axis, Ix2, Zip};
+use ndarray_parallel::prelude::*;
 use ndarray_rand::RandomExt;
 use rand;
-use rand::distributions::Range;
+use rand::distributions::Uniform;
 use rand::Rng;
 use statrs::statistics::Min;
 use std::cmp::PartialOrd;
@@ -43,13 +44,12 @@ impl Centroid {
         */
 
         // Calculate Euclidean distance
-        let distance: f64 = Sum::sum(
-            point_a
-                .into_iter()
-                .zip(point_b.into_iter())
-                .map(|(a, b): (&f64, &f64)| (a - b).powf(2f64)),
-        );
-        distance.sqrt()
+        point_a
+            .into_iter()
+            .zip(point_b.into_iter())
+            .map(|(a, b): (&f64, &f64)| (a - b).powf(2f64))
+            .sum::<f64>()
+            .sqrt()
     }
 
     pub fn update(&mut self, data: &Array2<f64>) {
@@ -105,102 +105,91 @@ impl KMeans {
         }
     }
 
-    pub fn fit(&mut self, data: &Array2<f64>) {
+    pub fn fit(&mut self, data: &ArrayView2<f64>) {
         /*
             Fit KMeans model to data
         */
         let mut lowest_error = f64::MAX;
         let mut labels = Vec::with_capacity(data.shape()[0]);
 
+        self.centroids = Some(self.init_centroids(data, 0));
+
         for n_iteration in 0..self.iter {
             // Initialize centroids; keep track of the starting point
             let idx = rand::thread_rng().gen_range(0, data.shape()[0]) as usize;
-            self.centroids = Some(self.init_centroids(&data, idx));
+            let mut iter_centroids = self.init_centroids(data, idx);
 
             // Try to converge centroids up to max_iter
             for i in 0..self.max_iter {
                 // Get current centroid assignments for data
-                labels = self.predict(&data);
-                let mut n_stable = 0;
+                labels = self.predict(data);
 
-                // Assuming we have initialized centroids...
-                if let Some(ref mut centroids) = self.centroids {
-                    // Iter over centroids, collecting points assigned to that cluster, and then
-                    // update the centroid center.
-                    for ref mut centroid in centroids {
-                        // Find indexes of points beloning to current centroid
-                        let filtered_points = labels
-                            .iter()
-                            .zip(data.outer_iter())
-                            .enumerate()
-                            .filter_map(|(idx, (label, point))| match *label == centroid.label {
-                                true => Some(idx as usize),
-                                false => None,
-                            })
-                            .collect::<Vec<usize>>();
+                // Iter over centroids, collecting points assigned to that cluster, and then
+                // update the centroid center.
 
-                        // Fetch those points and update centroid
-                        let points = data.select(Axis(0), &filtered_points);
+                iter_centroids.iter_mut().for_each(|centroid| {
+                    // Find indexes of points beloning to current centroid
+                    let filtered_points = labels
+                        .iter()
+                        .enumerate()
+                        .filter_map(|(idx, label)| match *label == centroid.label {
+                            true => Some(idx as usize),
+                            false => None,
+                        })
+                        .collect::<Vec<usize>>();
 
-                        // Check if cluster has any assigned points, update if so.
-                        if !&points.is_empty() {
-                            centroid.update(&points);
-                        }
+                    // Fetch those points and update centroid
+                    let points = data.select(Axis(0), &filtered_points);
 
-                        if centroid.stable {
-                            n_stable += 1;
-                        }
+                    // Check if cluster has any assigned points, update if so.
+                    if !&points.is_empty() {
+                        centroid.update(&points);
                     }
-                }
+                });
 
                 // Check if all centroids are converged, and break if so.
-                if n_stable == self.k {
+                if iter_centroids.iter().all(|centroid| centroid.stable) {
                     break;
                 }
             } // End of max iter attempts for centroid stabilization
 
-            let centroids = self.centroids.clone().unwrap();
-            let error = iter::repeat(&centroids)
+            let error = iter::repeat(&iter_centroids)
                 .zip(labels.iter())
                 .zip(data.outer_iter())
-                .map(|((centroids, label), point)| {
-                    Centroid::distance(&centroids[*label as usize].center.view(), &point)
+                .map(|((iter_centroids, label), point)| {
+                    Centroid::distance(&iter_centroids[*label as usize].center.view(), &point)
                 })
                 .sum::<f64>();
             if error < lowest_error {
                 lowest_error = error;
-                self.centroids = Some(centroids);
+                self.centroids = Some(iter_centroids);
             }
         } // End of kmeans iterations for best init
     }
 
-    pub fn predict(&self, data: &Array2<f64>) -> Vec<u32> {
+    pub fn predict(&self, data: &ArrayView2<f64>) -> Vec<u32> {
         /*
             Calculate which centroid each data point belongs to.
         */
         //let mut classifications = Vec::new();
         // Sort the data into which centroid it should be pushed to
-        let mut classifications = Vec::new();
-        for point in data.outer_iter() {
-            if let Some(ref centroids) = self.centroids {
-                let distances = centroids
+        data.outer_iter()
+            .map(|point| {
+                let (distance, label) = &self
+                    .centroids
+                    .as_ref()
+                    .unwrap()
                     .iter()
-                    .map(|centroid| Centroid::distance(&centroid.center.view(), &point))
-                    .collect::<Vec<f64>>();
-                let mut min = f64::MAX;
-                let mut label = 0;
-                for (dist, centroid) in distances.iter().zip(centroids.iter()) {
-                    if dist < &min {
-                        min = *dist;
-                        label = centroid.label;
-                    }
-                }
-                classifications.push(label);
-            } else {
-                panic!("Centroids are non-existant!");
-            }
-        }
-        classifications
+                    .map(|centroid| {
+                        (
+                            Centroid::distance(&centroid.center.view(), &point),
+                            centroid.label,
+                        )
+                    })
+                    .fold((0., 0), |a, b| if a.0 < b.0 { a } else { b });
+                *label
+            })
+            .collect::<Vec<u32>>()
     }
 
     fn calculate_error(&self) -> f64 {
@@ -210,7 +199,7 @@ impl KMeans {
         6.5
     }
 
-    fn init_centroids(&mut self, data: &Array2<f64>, start_idx: usize) -> Vec<Centroid> {
+    fn init_centroids(&mut self, data: &ArrayView2<f64>, start_idx: usize) -> Vec<Centroid> {
         // Set vector of indices representing points to be assigned to centroids
         let mut indices = Vec::with_capacity(self.k as usize);
 
@@ -224,7 +213,7 @@ impl KMeans {
             let center = data.slice(s![indices[indices.len() - 1], ..]);
 
             // Get normalized distances from center
-            let distances = Self::normed_distances_from_point(&center, &data, distances);
+            let distances = Self::normed_distances_from_point(&center, data, distances);
 
             // Choose new center based on normed distances
             let new_centroid_idx = Self::choose_next_centroid_idx(
@@ -249,27 +238,16 @@ impl KMeans {
 
         let sum = normed_distances.sum_axis(Axis(0));
         normed_distances = normed_distances / &sum;
-        let cumsum = normed_distances
+        let random_prob = rand::thread_rng().gen_range(0_f64, 1_f64);
+
+        let new_centroid_idx = normed_distances
             .iter()
             .scan(0.0, |cs: &mut f64, value| {
                 *cs += *value;
                 Some(*cs)
             })
-            .collect::<Vec<f64>>();
-
-        let random_prob = rand::thread_rng().gen_range(0_f64, 1_f64);
-        let new_centroid_idx = cumsum
-            .iter()
             .enumerate()
-            .filter_map(
-                |(i, prob)| {
-                    if prob >= &random_prob {
-                        Some(i)
-                    } else {
-                        None
-                    }
-                },
-            )
+            .filter_map(|(i, prob)| if prob >= random_prob { Some(i) } else { None })
             .next()
             .expect(&format!(
                 "No probabilities found greater than {}",
@@ -281,7 +259,7 @@ impl KMeans {
 
     fn normed_distances_from_point(
         center: &ArrayView1<f64>,
-        points: &Array2<f64>,
+        points: &ArrayView2<f64>,
         previous_distances: Option<&Array1<f64>>,
     ) -> Option<Array1<f64>> {
         /*
@@ -299,8 +277,7 @@ impl KMeans {
                     .map(|v| v.abs().powf(2_f64))
                     .sum()
             })
-            .map(|normalized: f64| (normalized).powf(2_f64))
-            .collect::<Vec<f64>>();
+            .map(|normalized: f64| (normalized).powf(2_f64));
 
         // If previous distances were passed, return the lowest dist when compared against new distances
         // otherwise return the current distances.
@@ -308,18 +285,17 @@ impl KMeans {
             Some(prev_distances) => {
                 let distances = prev_distances
                     .iter()
-                    .zip(distances.iter())
+                    .zip(distances)
                     .map(|(old_dist, new_dist)| {
-                        if new_dist < old_dist {
-                            *new_dist
+                        if new_dist < *old_dist {
+                            new_dist
                         } else {
                             *old_dist
                         }
-                    })
-                    .collect();
-                Some(Array1::from_vec(distances))
+                    });
+                Some(Array1::from_iter(distances))
             }
-            None => Some(Array1::from_vec(distances)),
+            None => Some(Array1::from_iter(distances)),
         }
     }
 }

@@ -322,7 +322,7 @@ class OptimalK:
             sk,
             gap_star,
             sk_star,
-        ) in gapstat.optimal_k(X, cluster_array):
+        ) in gapstat.optimal_k(X.astype(np.float64), cluster_array.astype(np.int64)):
             yield GapCalcResult(
                 gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
             )
