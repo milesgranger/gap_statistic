@@ -1,4 +1,4 @@
-#![feature(specialization)]
+#![feature(specialization, test)]
 
 #[macro_use]
 pub extern crate pyo3;
@@ -10,6 +10,7 @@ pub extern crate num_traits;
 pub extern crate rand;
 pub extern crate rayon;
 pub extern crate statrs;
+extern crate test;
 
 use pyo3::prelude::*;
 

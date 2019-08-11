@@ -1,5 +1,22 @@
+
 use gap_statistic;
 use kmeans;
+use test::Bencher;
+use ndarray::Array2;
+use ndarray_rand::RandomExt;
+use rand::distributions::ChiSquared;
+
+
+#[bench]
+fn bench_kmeans(b: &mut Bencher) {
+
+    let x = Array2::random((1000, 4), ChiSquared::new(0.1));
+    let mut clf = kmeans::KMeans::new(3, 0.001, 100, 32);
+
+    b.iter(|| {
+        clf.fit(&x);
+    });
+}
 
 #[test]
 fn test_optimalk() {
@@ -62,6 +79,6 @@ fn test_optimalk() {
         .map(|arr| arr.to_vec())
         .collect::<Vec<Vec<f64>>>();
 
-    let result = gap_statistic::optimal_k(data, (1..6).collect(), 10);
+    let _result = gap_statistic::optimal_k(data, (1..6).collect(), 10);
     // println!("Got {:?}", result)
 }
