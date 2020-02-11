@@ -91,6 +91,8 @@ The columns of the dataframe are:
   - `gap_value` - The Gap value for this `n`.
   - `gap*` - The Gap\* value for this `n`.
   - `ref_dispersion_std` - The standard deviation of the reference distributions for this `n`.
+  - `sk` - The standard error of the Gap statistic for this `n`.
+  - `sk*` - The standard error of the Gap\* statistic for this `n`.
   - `diff` - The diff value for this `n` (see the methodology section for details).
   - `diff*` - The diff\* value for this `n` (corresponding to the diff value for Gap\*).
 
