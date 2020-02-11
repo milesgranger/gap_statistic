@@ -152,7 +152,7 @@ class OptimalK:
 
         # drop auxilariy columns
         gap_df.drop(
-            labels=["sdk", "sk", "sk*", "gap_k+1", "gap*_k+1", "sk+1", "sk*+1"],
+            labels=["sdk", "gap_k+1", "gap*_k+1", "sk+1", "sk*+1"],
             axis=1,
             inplace=True,
             errors="ignore",
