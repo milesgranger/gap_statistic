@@ -259,11 +259,15 @@ class OptimalK:
         # Holder for reference dispersion results
         ref_dispersions = np.zeros(n_refs)
 
+        # Compute the range of each feature
+        X = np.asarray(X)
+        a, b = X.min(axis=0, keepdims=True), X.max(axis=0, keepdims=True)
+
         # For n_references, generate random sample and perform kmeans getting resulting dispersion of each loop
         for i in range(n_refs):
 
-            # Create new random reference set
-            random_data = np.random.random_sample(size=X.shape)
+            # Create new random reference set uniformly over the range of each feature
+            random_data = np.random.random_sample(size=X.shape) * (b - a) + a
 
             # Fit to it, getting the centroids and labels, and add to accumulated reference dispersions array.
             centroids, labels = self.clusterer(
