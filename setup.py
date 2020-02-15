@@ -3,7 +3,6 @@ from setuptools import setup
 install_requires = ["numpy", "pandas", "scipy"]
 
 setup_requires = [
-    "setuptools_scm",
     "pytest-runner",
     "pytest",
     "scikit-learn",
@@ -15,6 +14,7 @@ tests_require = ["scikit-learn", "pytest", "joblib", "black", "click"]
 
 setup(
     name="gap-stat",
+    version="2.0.0-rc1",
     author="Miles Granger",
     maintainer="Miles Granger",
     author_email="miles59923@gmail.com",
@@ -48,5 +48,4 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",
     ],
-    use_scm_version={"write_to": "gap_statistic/_version.py", "relative_to": __file__},
 )
