@@ -22,7 +22,7 @@ pub mod kmeans;
 mod tests;
 
 #[pymodule]
-fn gapstat(_py: Python, m: &PyModule) -> Result<(), pyo3::PyErr> {
+fn gapstat_rs(_py: Python, m: &PyModule) -> Result<(), pyo3::PyErr> {
     #[pyfn(m, "kmeans")]
     fn kmeans(data: Vec<Vec<f64>>, k: u32, max_iter: u32, iter: u32) -> PyResult<Vec<u32>> {
         let data = gap_statistic::convert_2d_vec_to_array(data);
