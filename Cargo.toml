@@ -8,7 +8,7 @@ name = "gap_statistic"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "0.12"
+ndarray = "0.12.0"
 ndarray-rand = "0.9.0"
 ndarray-parallel = "0.9.0"
 num-traits = "0.2.4"
