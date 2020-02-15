@@ -4,7 +4,7 @@ version = "2.0.0-a1"
 authors = ["Miles Granger <miles59923@gmail.com>"]
 
 [lib]
-name = "gap_statistic"
+name = "gapstat"
 crate-type = ["cdylib"]
 
 [dependencies]
