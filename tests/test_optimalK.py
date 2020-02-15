@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import pytest
 
 import numpy as np
@@ -74,6 +75,27 @@ def test_optimalk(parallel_backend, n_jobs, n_clusters):
     ), "Correct clusters is {}, OptimalK suggested {}".format(
         n_clusters, suggested_clusters
     )
+
+
+@pytest.mark.skipif(
+    "TEST_RUST_EXT" not in os.environ, reason="Rust extension not built."
+)
+def test_optimalk_rust_ext():
+    """
+    Test core functionality of OptimalK using all backends.
+    """
+
+    # Create optimalK instance
+    optimalK = OptimalK(parallel_backend="rust", n_jobs=1)
+
+    # Create data
+    X, y = make_blobs(n_samples=int(1e3), n_features=2, centers=3)
+
+    suggested_clusters = optimalK(X, n_refs=3, cluster_array=np.arange(1, 10))
+
+    assert np.allclose(
+        suggested_clusters, 3, 2
+    ), "Correct clusters is {}, OptimalK suggested {}".format(3, suggested_clusters)
 
 
 def test_optimalk_cluster_array_vs_data_sizes_error():

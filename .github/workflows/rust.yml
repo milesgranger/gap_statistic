@@ -37,3 +37,11 @@ jobs:
 
     - name: Build Wheels
       run: maturin build
+
+    - name: Python extension test
+      env:
+        TEST_RUST_EXT: 1
+      run: |
+        pip install -e .
+        maturin develop
+        python setup.py test

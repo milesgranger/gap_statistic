@@ -316,7 +316,7 @@ class OptimalK:
         """
         Process gap stat using pure rust
         """
-        from gap_statistic.rust import gapstat
+        import gapstat_rs
 
         for (
             n_clusters,
@@ -326,7 +326,7 @@ class OptimalK:
             sk,
             gap_star,
             sk_star,
-        ) in gapstat.optimal_k(X.astype(np.float64), cluster_array.astype(np.int64)):
+        ) in gapstat_rs.optimal_k(X.astype(np.float64), cluster_array.astype(np.int64)):
             yield GapCalcResult(
                 gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
             )
