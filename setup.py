@@ -1,20 +1,5 @@
-import sys
 from setuptools import setup
 from gap_statistic import __version__
-
-try:
-    from setuptools_rust import RustExtension, Binding
-except ImportError:
-    import subprocess
-
-    errno = subprocess.call(
-        [sys.executable, "-m", "pip", "install", "setuptools-rust>=0.9.2"]
-    )
-    if errno:
-        print("Please install the 'setuptools-rust>=0.9.2' package")
-        raise SystemExit(errno)
-    else:
-        from setuptools_rust import RustExtension, Binding
 
 install_requires = ["numpy", "pandas", "scipy"]
 
@@ -40,9 +25,6 @@ setup(
     description="Python implementation of the gap statistic with Rust optimizations.",
     long_description="Uses the gap statistic method by Tibshirani, Walther, Hastie to suggest n_clusters.",
     packages=["gap_statistic"],
-    rust_extensions=[
-        RustExtension("gap_statistic.rust.gapstat", "Cargo.toml", binding=Binding.PyO3)
-    ],
     license="MIT",
     url="https://github.com/milesgranger/gap_statistic",
     zip_safe=False,

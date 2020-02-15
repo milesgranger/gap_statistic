@@ -1,22 +1,22 @@
 [package]
-name = "gap-stat"
-version = "1.7.1"
+name = "gapstat-rs"
+version = "2.0.0-a1"
 authors = ["Miles Granger <miles59923@gmail.com>"]
 
 [lib]
-name = "gap_statistic"
+name = "gapstat_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-ndarray = "^0.12"
+ndarray = "0.12.0"
 ndarray-rand = "0.9.0"
-ndarray-parallel = "^0.9.0"
-num-traits = "^0.2.4"
-numpy = "0.6"
-pyo3 = { version = "^0.7.0", features = ["extension-module"]}
+ndarray-parallel = "0.9.0"
+num-traits = "0.2.4"
+numpy = "0.7"
+pyo3 = { version = "0.8", features = ["extension-module"]}
 rand = "0.6.0"
-rayon = "^1.0.1"
-statrs = "^0.9.0"
+rayon = "1.0.1"
+statrs = "0.9.0"
 
 [dev-dependencies]
 criterion = "0.2"

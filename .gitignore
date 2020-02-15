@@ -10,7 +10,6 @@ __pycache__/
 wheelhouse/
 .idea/
 .pytest_cache/
-Cargo.lock
 
 # Distribution / packaging
 .Python

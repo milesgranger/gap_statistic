@@ -1,7 +1,8 @@
 
 ### Python implementation of the [Gap Statistic](http://www.web.stanford.edu/~hastie/Papers/gap.pdf)
 
-[![Build Status](https://milesgranger.visualstudio.com/builds/_apis/build/status/gap_statistic-CI?branchName=master)](https://milesgranger.visualstudio.com/builds/_build/latest?definitionId=11&branchName=master)
+[![PythonCI](https://github.com/milesgranger/gap_statistic/workflows/PythonCI/badge.svg?branch=master)](https://github.com/milesgranger/gap_statistic/actions?query=branch=master)
+[![RustCI](https://github.com/milesgranger/gap_statistic/workflows/RustCI/badge.svg?branch=master)](https://github.com/milesgranger/gap_statistic/actions?query=branch=master)
 
 [![Downloads](http://pepy.tech/badge/gap-stat)](http://pepy.tech/project/gap-stat)
 [![Coverage Status](https://coveralls.io/repos/github/milesgranger/gap_statistic/badge.svg)](https://coveralls.io/github/milesgranger/gap_statistic)
