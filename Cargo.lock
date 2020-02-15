@@ -220,7 +220,7 @@ checksum = "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
 
 [[package]]
 name = "gapstat-rs"
-version = "2.0.0-a1"
+version = "2.0.0-rc1"
 dependencies = [
  "criterion",
  "ndarray",

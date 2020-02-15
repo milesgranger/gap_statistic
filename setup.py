@@ -33,6 +33,7 @@ setup(
     tests_require=tests_require,
     test_suite="tests",
     include_package_data=True,
+    extras_require={"rust": ["gapstat_rs"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
