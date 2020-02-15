@@ -47,5 +47,5 @@ jobs:
         TEST_RUST_EXT: 1
         GA_OS: ${{ matrix.os }}
       run: |
-        pip install wheels/*
+        pip install gapstat-rs --no-index --find-links wheels
         python setup.py test
