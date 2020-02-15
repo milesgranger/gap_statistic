@@ -44,6 +44,5 @@ jobs:
       env:
         TEST_RUST_EXT: 1
       run: |
-        pip install -e .
         maturin develop
         python setup.py test
