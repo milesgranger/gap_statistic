@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -20,7 +20,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
       - name: Install
-        run: pip install -r requirements.txt
+        run: pip install .
 
       - name: Test
+        env:
+          GA_OS: ${{ matrix.os }}
         run: python setup.py test
