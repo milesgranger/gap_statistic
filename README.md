@@ -30,6 +30,12 @@ PyPi:
 pip install --upgrade gap-stat
 ```
 
+With Rust extension:
+```commandline
+pip install --upgrade gap-stat[rust]
+```
+
+
 ---
 #### Uninstall:
 ```commandline

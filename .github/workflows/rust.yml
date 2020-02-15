@@ -33,7 +33,9 @@ jobs:
         architecture: 'x64'
 
     - name: Install Maturin
-      run: pip install maturin
+      run: |
+        pip install -r requirements.txt
+        pip install maturin
 
     - name: Build Wheels
       run: maturin build
