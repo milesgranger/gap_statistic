@@ -21,12 +21,6 @@ jobs:
         toolchain: nightly
         components: clippy
         override: true
-    - name: Build
-      run: cargo build
-
-    - name: Run tests
-      run: cargo test
-
     - uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
@@ -34,8 +28,14 @@ jobs:
 
     - name: Install Maturin
       run: |
-        pip install -e .
+        pip install .
         pip install maturin
+
+    - name: Build
+      run: cargo build
+
+    - name: Run tests
+      run: cargo test
 
     - name: Build Wheels
       run: |

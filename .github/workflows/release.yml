@@ -21,11 +21,6 @@ jobs:
         toolchain: nightly
         components: clippy
         override: true
-    - name: Build
-      run: cargo build
-
-    - name: Run tests
-      run: cargo test
 
     - uses: actions/setup-python@v1
       with:
@@ -33,7 +28,15 @@ jobs:
         architecture: 'x64'
 
     - name: Install Maturin
-      run: pip install maturin twine
+      run: |
+        pip install .
+        pip install maturin twine wheel
+
+    - name: Build
+      run: cargo build
+
+    - name: Run tests
+      run: cargo test
 
     - name: Rust - Build & Publish
       env:
@@ -46,8 +49,6 @@ jobs:
       env:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        pip install -e .
-        pip install wheel
         python setup.py sdist
         python setup.py bdist_wheel
         twine upload -u milesg --skip-existing dist/*
