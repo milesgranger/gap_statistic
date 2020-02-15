@@ -43,9 +43,9 @@ jobs:
         twine upload -u milesg --skip-existing target/wheels/*
 
     - name: Python - Build & Publish
-        env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-        run: |
-          python setup.py sdist
-          python setup.py bdist_wheel
-          twine upload -u milesg --skip-existing dist/*
+      env:
+        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+        twine upload -u milesg --skip-existing dist/*
