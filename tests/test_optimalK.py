@@ -50,7 +50,7 @@ def test_alternative_clusting_method(ClusterModel):
             "joblib", 1, 3, id="parallel_backend='joblib', n_jobs=1, n_clusters=3"
         ),
         pytest.param(None, 1, 3, id="parallel_backend=None, n_jobs=1, n_clusters=3"),
-        # TODO: Add back this test param
+        # TODO: Add back this test param in rust side extension
         # pytest.param(
         #    "rust", 1, 3, id="parallel_backend='rust', n_jobs=1, n_clusters=3"
         # ),
