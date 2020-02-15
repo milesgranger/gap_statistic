@@ -44,5 +44,6 @@ jobs:
       env:
         TEST_RUST_EXT: 1
       run: |
+        ls target/wheels/
         pip install target/wheels/*
         python setup.py test
