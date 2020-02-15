@@ -20,7 +20,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
       - name: Install
-        run: pip install -e .
+        run: pip install .
 
       - name: Test
         env:
