@@ -22,7 +22,7 @@ setup(
     author_email="miles59923@gmail.com",
     maintainer_email="miles59923@gmail.com",
     keywords="kmeans unsupervised learning machine-learning clustering",
-    description="Python implementation of the gap statistic with Rust optimizations.",
+    description="Python implementation of the gap statistic with optional Rust optimizations.",
     long_description="Uses the gap statistic method by Tibshirani, Walther, Hastie to suggest n_clusters.",
     packages=["gap_statistic"],
     license="MIT",
@@ -33,6 +33,7 @@ setup(
     tests_require=tests_require,
     test_suite="tests",
     include_package_data=True,
+    extras_require={"rust": ["gapstat-rs"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

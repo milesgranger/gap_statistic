@@ -1,10 +1,10 @@
-name: RustCI
+name: ReleaseCI
 
 on:
+  release:
   push:
-    branches:
-      - master
-  pull_request:
+    tags:
+      - "*"
 
 jobs:
   build-n-test:
@@ -33,19 +33,19 @@ jobs:
         architecture: 'x64'
 
     - name: Install Maturin
-      run: |
-        pip install -r requirements.txt
-        pip install maturin
+      run: pip install maturin twine
 
-    - name: Build Wheels
-      run: |
-        maturin list-python
-        maturin build --out wheels --interpreter python
-
-    - name: Python extension test
+    - name: Rust - Build & Publish
       env:
-        TEST_RUST_EXT: 1
+        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        ls wheels/
-        pip install wheels/*
-        python setup.py test
+        maturin build --release --out wheels
+        twine upload -u milesg --skip-existing wheels/*
+
+    - name: Python - Build & Publish
+      env:
+        TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+        twine upload -u milesg --skip-existing dist/*
