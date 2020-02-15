@@ -46,6 +46,7 @@ jobs:
       env:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
+        pip install -r requirements.txt
         python setup.py sdist
         python setup.py bdist_wheel
         twine upload -u milesg --skip-existing dist/*
