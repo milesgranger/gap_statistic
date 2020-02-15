@@ -39,8 +39,8 @@ jobs:
       env:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        maturin build --release
-        twine upload -u milesg --skip-existing target/wheels/*
+        maturin build --release --out wheels
+        twine upload -u milesg --skip-existing wheels/*
 
     - name: Python - Build & Publish
       env:

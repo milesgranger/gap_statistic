@@ -38,12 +38,13 @@ jobs:
         pip install maturin
 
     - name: Build Wheels
-      run: maturin build
+      run: |
+        maturin build --out wheels
 
     - name: Python extension test
       env:
         TEST_RUST_EXT: 1
       run: |
-        ls target/wheels/
-        pip install target/wheels/*
+        ls wheels/
+        pip install wheels/*
         python setup.py test
