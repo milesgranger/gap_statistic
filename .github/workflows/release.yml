@@ -9,7 +9,7 @@ on:
 jobs:
   build-n-test:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -47,6 +47,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
         pip install -r requirements.txt
+        pip install wheel
         python setup.py sdist
         python setup.py bdist_wheel
         twine upload -u milesg --skip-existing dist/*

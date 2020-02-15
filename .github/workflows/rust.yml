@@ -9,7 +9,7 @@ on:
 jobs:
   build-n-test:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -40,7 +40,7 @@ jobs:
     - name: Build Wheels
       run: |
         maturin list-python
-        maturin build --out wheels --interpreter python
+        maturin build --out wheels
 
     - name: Python extension test
       env:
