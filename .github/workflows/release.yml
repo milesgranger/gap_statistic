@@ -32,12 +32,6 @@ jobs:
         pip install .
         pip install maturin twine wheel
 
-    - name: Build
-      run: cargo build
-
-    - name: Run tests
-      run: cargo test
-
     - name: Rust - Build & Publish
       env:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
