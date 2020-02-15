@@ -44,5 +44,5 @@ jobs:
       env:
         TEST_RUST_EXT: 1
       run: |
-        maturin develop
+        pip install target/wheels/*
         python setup.py test
