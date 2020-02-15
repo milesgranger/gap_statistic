@@ -34,7 +34,7 @@ jobs:
 
     - name: Install Maturin
       run: |
-        pip install -r requirements.txt
+        pip install -e .
         pip install maturin
 
     - name: Build Wheels
@@ -45,7 +45,7 @@ jobs:
     - name: Python extension test
       env:
         TEST_RUST_EXT: 1
+        GA_OS: ${{ matrix.os }}
       run: |
-        ls wheels/
         pip install wheels/*
         python setup.py test

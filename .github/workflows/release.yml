@@ -46,7 +46,7 @@ jobs:
       env:
         TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
       run: |
-        pip install -r requirements.txt
+        pip install -e .
         pip install wheel
         python setup.py sdist
         python setup.py bdist_wheel
