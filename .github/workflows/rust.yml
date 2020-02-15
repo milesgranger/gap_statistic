@@ -39,7 +39,8 @@ jobs:
 
     - name: Build Wheels
       run: |
-        maturin build --out wheels
+        maturin list-python
+        maturin build --out wheels --interpreter python
 
     - name: Python extension test
       env:
