@@ -311,7 +311,11 @@ class OptimalK:
         )
 
     def _process_with_rust(
-        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
+        self,
+        X: Union[pd.DataFrame, np.ndarray],
+        n_refs: int,
+        cluster_array: np.ndarray,
+        n_iter: int = 10,
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process gap stat using pure rust
@@ -326,7 +330,9 @@ class OptimalK:
             sk,
             gap_star,
             sk_star,
-        ) in gapstat_rs.optimal_k(X.astype(np.float64), cluster_array.astype(np.int64)):
+        ) in gapstat_rs.optimal_k(
+            X.astype(np.float64), cluster_array.astype(np.int64), n_iter, n_refs
+        ):
             yield GapCalcResult(
                 gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
             )

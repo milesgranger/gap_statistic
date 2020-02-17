@@ -36,18 +36,16 @@ fn gapstat_rs(_py: Python, m: &PyModule) -> Result<(), pyo3::PyErr> {
         py: Python,
         data: &PyArray2<f64>,
         cluster_range: &PyArray1<i64>,
-        iter: Option<i64>,
+        n_iter: Option<i32>,
+        n_refs: Option<i32>,
     ) -> PyResult<Vec<(i64, f64, f64, f64, f64, f64, f64)>> {
         let x = data.as_array();
         let cr = cluster_range.as_array();
+        let n_refs = n_refs.unwrap_or_else(|| 10) as u32;
+        let n_iter = n_iter.unwrap_or_else(|| 10) as u32;
 
-        let gapcalcs = py.allow_threads(move || {
-            if let Some(iterations) = iter {
-                gap_statistic::optimal_k(&x.view(), cr, iterations as u32)
-            } else {
-                gap_statistic::optimal_k(&x.view(), cr, 10)
-            }
-        });
+        let gapcalcs =
+            py.allow_threads(move || gap_statistic::optimal_k(&x.view(), cr, n_iter, n_refs));
 
         let results = gapcalcs
             .into_iter()

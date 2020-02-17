@@ -1,6 +1,6 @@
 [package]
 name = "gapstat-rs"
-version = "2.0.0-rc1"
+version = "2.0.0-rc2"
 authors = ["Miles Granger <miles59923@gmail.com>"]
 
 [lib]
