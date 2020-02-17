@@ -53,6 +53,7 @@ class OptimalK:
         parallel_backend: str = "joblib",
         clusterer: Callable = None,
         clusterer_kwargs: dict = None,
+        n_iter: int = 10,
     ) -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
@@ -62,6 +63,7 @@ class OptimalK:
         :param parallel_backend:
         :param clusterer:
         :param clusterer_kwargs:
+        :param n_iter int: only valid for 'rust' backend, iterations for Kmeans
         """
         if clusterer is not None and parallel_backend == "rust":
             raise ValueError(
@@ -73,6 +75,7 @@ class OptimalK:
             if parallel_backend in ["joblib", "multiprocessing", "rust"]
             else None
         )
+        self.n_iter = n_iter
         self.n_jobs = n_jobs if 1 <= n_jobs <= cpu_count() else cpu_count()  # type: int
         self.n_jobs = 1 if parallel_backend is None else self.n_jobs
         self.clusterer = clusterer if clusterer is not None else kmeans2
@@ -311,11 +314,7 @@ class OptimalK:
         )
 
     def _process_with_rust(
-        self,
-        X: Union[pd.DataFrame, np.ndarray],
-        n_refs: int,
-        cluster_array: np.ndarray,
-        n_iter: int = 10,
+        self, X: Union[pd.DataFrame, np.ndarray], n_refs: int, cluster_array: np.ndarray
     ) -> Generator[GapCalcResult, None, None]:
         """
         Process gap stat using pure rust
@@ -331,7 +330,7 @@ class OptimalK:
             gap_star,
             sk_star,
         ) in gapstat_rs.optimal_k(
-            X.astype(np.float64), cluster_array.astype(np.int64), n_iter, n_refs
+            X.astype(np.float64), cluster_array.astype(np.int64), self.n_iter, n_refs
         ):
             yield GapCalcResult(
                 gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
