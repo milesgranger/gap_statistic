@@ -23,6 +23,7 @@ pub fn optimal_k(
     data: &ArrayView2<f64>,
     cluster_range: ArrayView1<i64>,
     iter: u32,
+    n_refs: u32,
 ) -> Vec<GapCalcResult> {
     /*
         Given 2d data and a cluster range, return a vector of tuples
@@ -33,7 +34,7 @@ pub fn optimal_k(
     // Get gap values for each cluster in range.
     let gap_values = cluster_range
         .into_par_iter()
-        .map(|n_clusters| calculate_gap(data, *n_clusters as u32, iter))
+        .map(|n_clusters| calculate_gap(data, *n_clusters as u32, iter, n_refs))
         .collect::<Vec<GapCalcResult>>();
 
     gap_values
@@ -50,9 +51,7 @@ pub struct GapCalcResult {
 }
 
 // Calculate the gap value
-fn calculate_gap(data: &ArrayView2<f64>, n_clusters: u32, iter: u32) -> GapCalcResult {
-    let n_refs = 5; // TODO: Add this as parameter
-
+fn calculate_gap(data: &ArrayView2<f64>, n_clusters: u32, iter: u32, n_refs: u32) -> GapCalcResult {
     let mut km = KMeans::new(n_clusters, 0.00005, 20, iter);
 
     let ref_dispersions = (0..n_refs)

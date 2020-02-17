@@ -77,7 +77,7 @@ fn bench_optimalk(b: &mut Bencher) {
     let cluster_range = Array1::from_iter(1..6);
 
     b.iter(|| {
-        let _ = gap_statistic::optimal_k(&x.view(), cluster_range.view(), 10);
+        let _ = gap_statistic::optimal_k(&x.view(), cluster_range.view(), 10, 10);
     });
 }
 
@@ -141,6 +141,6 @@ fn test_optimalk() {
         .into_shape((50, 3))
         .unwrap();
     let cluster_range = Array1::from_iter(1..6);
-    let _result = gap_statistic::optimal_k(&x.view(), cluster_range.view(), 10);
+    let _result = gap_statistic::optimal_k(&x.view(), cluster_range.view(), 10, 10);
     // println!("Got {:?}", result)
 }
