@@ -1,4 +1,4 @@
-use ndarray::{Array, Array1, Array2, ArrayView1, ArrayView2};
+use ndarray::{Array, Array1, Array2, ArrayView1, ArrayView2, Axis};
 use ndarray_parallel::prelude::*;
 use ndarray_rand::RandomExt;
 use num_traits::pow::Pow;
@@ -50,13 +50,29 @@ pub struct GapCalcResult {
     pub(crate) sk_star: f64,
 }
 
+/// Generate a reference dataset from the original data
+pub(crate) fn ref_dataset(data: &ArrayView2<f64>) -> Array2<f64> {
+    let column_dists: Vec<_> = data
+        .axis_iter(Axis(1))
+        .map(|col| {
+            Array::random(col.dim(), Uniform::new(col.min(), col.max())).insert_axis(Axis(0))
+        })
+        .collect();
+    let column_dists_views: Vec<_> = column_dists.iter().map(|a| a.view()).collect();
+    // Unwraps should be ok, since we haven't change the data/column sizes
+    ndarray::stack(Axis(0), &column_dists_views)
+        .unwrap()
+        .t()
+        .to_owned()
+}
+
 // Calculate the gap value
 fn calculate_gap(data: &ArrayView2<f64>, n_clusters: u32, iter: u32, n_refs: u32) -> GapCalcResult {
     let mut km = KMeans::new(n_clusters, 0.00005, 20, iter);
 
     let ref_dispersions = (0..n_refs)
         .map(|_| {
-            let random_data = Array::random(data.dim(), Uniform::new(0., 1.));
+            let random_data = ref_dataset(data);
 
             // Get centroids from data, each centroid contains .point() and .label()
             km.fit(&random_data.view());

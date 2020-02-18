@@ -1,9 +1,28 @@
 use gap_statistic;
 use kmeans;
-use ndarray::{Array1, Array2};
+use ndarray::{arr2, Array1, Array2};
 use ndarray_rand::RandomExt;
 use rand::distributions::ChiSquared;
 use test::Bencher;
+
+#[test]
+fn test_ref_dataset() {
+    let data = arr2(&[[10.0, -10.0], [20.0, -20.0], [30.0, -30.0]]);
+
+    let ref_data = gap_statistic::ref_dataset(&data.view());
+
+    // First column all vals between 10.0 and 30.0
+    assert!(ref_data
+        .slice(s![.., 0])
+        .iter()
+        .all(|v| *v >= 10.0 && *v <= 30.0));
+
+    // Second column all vals between -10.0 and -30.0
+    assert!(ref_data
+        .slice(s![.., 1])
+        .iter()
+        .all(|v| *v <= -10.0 && *v >= -30.0));
+}
 
 #[bench]
 fn bench_kmeans(b: &mut Bencher) {
