@@ -319,7 +319,14 @@ class OptimalK:
         """
         Process gap stat using pure rust
         """
-        import gapstat_rs
+        try:
+            import gapstat_rs
+        except ImportError:
+            warnings.warn(
+                "Could not import 'gapstat_rs', perhaps gap-stat was not installed with this feature? "
+                "`pip install gap-stat[rust]`"
+            )
+            raise
 
         for (
             n_clusters,
