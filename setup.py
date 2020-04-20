@@ -14,7 +14,7 @@ tests_require = ["scikit-learn", "pytest", "joblib", "black", "click"]
 
 setup(
     name="gap-stat",
-    version="2.0.0",
+    version="2.0.1",
     author="Miles Granger",
     maintainer="Miles Granger",
     author_email="miles59923@gmail.com",

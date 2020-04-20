@@ -328,6 +328,11 @@ class OptimalK:
             )
             raise
 
+        X = X if isinstance(X, np.ndarray) else X.values
+        X = X.astype(np.float64)
+
+        cluster_array = np.array(cluster_array, dtype=np.int64)
+
         for (
             n_clusters,
             gap_value,
@@ -336,9 +341,7 @@ class OptimalK:
             sk,
             gap_star,
             sk_star,
-        ) in gapstat_rs.optimal_k(
-            X.astype(np.float64), cluster_array.astype(np.int64), self.n_iter, n_refs
-        ):
+        ) in gapstat_rs.optimal_k(X, cluster_array, self.n_iter, n_refs):
             yield GapCalcResult(
                 gap_value, n_clusters, ref_dispersion_std, sdk, sk, gap_star, sk_star
             )
