@@ -3,7 +3,7 @@ import os
 import pytest
 
 import numpy as np
-from sklearn.datasets.samples_generator import make_blobs
+from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans, MeanShift
 
 from gap_statistic import OptimalK
