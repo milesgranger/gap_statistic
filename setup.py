@@ -5,12 +5,12 @@ install_requires = ["numpy", "pandas", "scipy"]
 setup_requires = [
     "pytest-runner",
     "pytest",
-    "scikit-learn",
+    "scikit-learn>=0.24.0",
     "joblib",
     "scipy",
     "pandas",
 ]
-tests_require = ["scikit-learn", "pytest", "joblib", "black", "click"]
+tests_require = ["scikit-learn>=0.24.0", "pytest", "joblib", "black", "click"]
 
 setup(
     name="gap-stat",

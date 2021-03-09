@@ -3,7 +3,7 @@ import os
 import pytest
 
 import numpy as np
-from sklearn.datasets.samples_generator import make_blobs
+from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans, MeanShift
 
 from gap_statistic import OptimalK
@@ -103,7 +103,6 @@ def test_optimalk_cluster_array_vs_data_sizes_error():
     Test ValueError when cluster_array is larger than dataset.
     """
     import numpy as np
-    from sklearn.datasets.samples_generator import make_blobs
     from gap_statistic import OptimalK
 
     # Create optimalK instance
@@ -121,7 +120,6 @@ def test_optimalk_cluster_array_values_error():
     """
     Test ValueError when cluster_array contains values less than 1
     """
-    from sklearn.datasets.samples_generator import make_blobs
     from gap_statistic import OptimalK
 
     # Create optimalK instance
@@ -139,7 +137,6 @@ def test_optimalk_cluster_array_empty_error():
     """
     Test ValueError when cluster_array is empty.
     """
-    from sklearn.datasets.samples_generator import make_blobs
     from gap_statistic import OptimalK
 
     # Create optimalK instance
