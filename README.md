@@ -1,4 +1,3 @@
-
 ### Python implementation of the [Gap Statistic](http://www.web.stanford.edu/~hastie/Papers/gap.pdf)
 
 [![PythonCI](https://github.com/milesgranger/gap_statistic/workflows/PythonCI/badge.svg?branch=master)](https://github.com/milesgranger/gap_statistic/actions?query=branch=master)
@@ -10,6 +9,13 @@
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
 ---
+
+### Maintenance mode
+
+I've lost interest/time in developing this further, other things have taken priority for some time now. However, all is not lost. I will be willing to review/comment on any issues/PRs but will not complete any fixes or feature requests myself. 
+
+---
+
 #### Purpose
 Dynamically identify the suggested number of clusters in a data-set
 using the gap statistic.
