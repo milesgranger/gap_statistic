@@ -136,7 +136,7 @@ class OptimalK:
             # Assign this loop's gap statistic to gaps
             gap_df = pd.concat([
                 gap_df,
-                {
+                pd.DataFrame({
                     "n_clusters": [gap_calc_result.n_clusters],
                     "gap_value": [gap_calc_result.gap_value],
                     "ref_dispersion_std": [gap_calc_result.ref_dispersion_std],
@@ -144,7 +144,7 @@ class OptimalK:
                     "sk": [gap_calc_result.sk],
                     "gap*": [gap_calc_result.gap_star],
                     "sk*": [gap_calc_result.sk_star]
-                    }
+                    })
                 ])
             gap_df["gap_k+1"] = gap_df["gap_value"].shift(-1)
             gap_df["gap*_k+1"] = gap_df["gap*"].shift(-1)
