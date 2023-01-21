@@ -132,19 +132,22 @@ class OptimalK:
 
         # Calculate the gaps for each cluster count.
         for gap_calc_result in engine(X, n_refs, cluster_array):
-
             # Assign this loop's gap statistic to gaps
-            gap_df = gap_df.append(
-                {
-                    "n_clusters": gap_calc_result.n_clusters,
-                    "gap_value": gap_calc_result.gap_value,
-                    "ref_dispersion_std": gap_calc_result.ref_dispersion_std,
-                    "sdk": gap_calc_result.sdk,
-                    "sk": gap_calc_result.sk,
-                    "gap*": gap_calc_result.gap_star,
-                    "sk*": gap_calc_result.sk_star,
-                },
-                ignore_index=True,
+            gap_df = pd.concat(
+                [
+                    gap_df,
+                    pd.DataFrame(
+                        {
+                            "n_clusters": [gap_calc_result.n_clusters],
+                            "gap_value": [gap_calc_result.gap_value],
+                            "ref_dispersion_std": [gap_calc_result.ref_dispersion_std],
+                            "sdk": [gap_calc_result.sdk],
+                            "sk": [gap_calc_result.sk],
+                            "gap*": [gap_calc_result.gap_star],
+                            "sk*": [gap_calc_result.sk_star],
+                        }
+                    ),
+                ]
             )
             gap_df["gap_k+1"] = gap_df["gap_value"].shift(-1)
             gap_df["gap*_k+1"] = gap_df["gap*"].shift(-1)
@@ -268,7 +271,6 @@ class OptimalK:
 
         # For n_references, generate random sample and perform kmeans getting resulting dispersion of each loop
         for i in range(n_refs):
-
             # Create new random reference set uniformly over the range of each feature
             random_data = np.random.random_sample(size=X.shape) * (b - a) + a
 
@@ -371,7 +373,6 @@ class OptimalK:
         Process calling of .calculate_gap() method using the multiprocessing library
         """
         with ProcessPoolExecutor(max_workers=self.n_jobs) as executor:
-
             jobs = [
                 executor.submit(self._calculate_gap, X, n_refs, n_clusters)
                 for n_clusters in cluster_array
