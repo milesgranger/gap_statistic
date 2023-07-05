@@ -65,7 +65,7 @@ class OptimalK:
         :param clusterer:
         :param clusterer_kwargs:
         :param n_iter int: only valid for 'rust' backend, iterations for Kmeans
-        :param random_state int: initialize RNG used to randomly select samples
+        :param random_state int: initialize RNG used to create random reference set
         """
         if clusterer is not None and parallel_backend == "rust":
             raise ValueError(
