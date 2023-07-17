@@ -54,7 +54,7 @@ class OptimalK:
         clusterer: Callable = None,
         clusterer_kwargs: dict = None,
         n_iter: int = 10,
-        random_state: int|None = None
+        random_state: int = None
     ) -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
