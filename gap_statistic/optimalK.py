@@ -54,6 +54,7 @@ class OptimalK:
         clusterer: Callable = None,
         clusterer_kwargs: dict = None,
         n_iter: int = 10,
+        random_state: int = None
     ) -> None:
         """
         Construct OptimalK to use n_jobs (multiprocessing using joblib, multiprocessing, or single core.
@@ -64,6 +65,7 @@ class OptimalK:
         :param clusterer:
         :param clusterer_kwargs:
         :param n_iter int: only valid for 'rust' backend, iterations for Kmeans
+        :param random_state int: initialize RNG used to create random reference set
         """
         if clusterer is not None and parallel_backend == "rust":
             raise ValueError(
@@ -84,6 +86,7 @@ class OptimalK:
             if clusterer is not None
             else dict(iter=10, minit="points")
         )
+        self._rs = np.random.RandomState(seed=random_state)
 
     def __call__(
         self,
@@ -260,7 +263,7 @@ class OptimalK:
     ) -> GapCalcResult:
         """
         Calculate the gap value of the given data, n_refs, and number of clusters.
-        Return the resutling gap value and n_clusters
+        Return the resulting gap value and n_clusters
         """
         # Holder for reference dispersion results
         ref_dispersions = np.zeros(n_refs)
@@ -272,7 +275,7 @@ class OptimalK:
         # For n_references, generate random sample and perform kmeans getting resulting dispersion of each loop
         for i in range(n_refs):
             # Create new random reference set uniformly over the range of each feature
-            random_data = np.random.random_sample(size=X.shape) * (b - a) + a
+            random_data = self._rs.random_sample(size=X.shape) * (b - a) + a
 
             # Fit to it, getting the centroids and labels, and add to accumulated reference dispersions array.
             centroids, labels = self.clusterer(
