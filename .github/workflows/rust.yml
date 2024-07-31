@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7]
+        python-version: [3.12]
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
@@ -21,7 +21,7 @@ jobs:
         toolchain: nightly
         components: clippy
         override: true
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         architecture: 'x64'
@@ -47,5 +47,6 @@ jobs:
         TEST_RUST_EXT: 1
         GA_OS: ${{ matrix.os }}
       run: |
+        pip install setuptools
         pip install gapstat-rs --no-index --find-links wheels
         python setup.py test

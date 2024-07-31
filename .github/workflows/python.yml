@@ -10,12 +10,13 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7]
+        python-version: [3.12]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
@@ -25,4 +26,6 @@ jobs:
       - name: Test
         env:
           GA_OS: ${{ matrix.os }}
-        run: python setup.py test
+        run: |
+          pip install setuptools
+          python setup.py test
